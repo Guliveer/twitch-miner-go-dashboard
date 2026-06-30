@@ -22,9 +22,9 @@ import { WatchersTab } from "./tabs/WatchersTab";
 import { useTransition } from "react";
 import { toast } from "sonner";
 
-type Props = { initialConfig: AccountConfigForm };
+type Props = { initialConfig: AccountConfigForm; isAdmin: boolean };
 
-export function ConfigEditor({ initialConfig }: Props) {
+export function ConfigEditor({ initialConfig, isAdmin }: Props) {
   const methods = useForm<AccountConfigForm>({
     resolver: zodResolver(accountConfigSchema),
     defaultValues: initialConfig,
@@ -58,21 +58,23 @@ export function ConfigEditor({ initialConfig }: Props) {
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="streamers">Streamers</TabsTrigger>
             <TabsTrigger value="betting">Betting</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+            {isAdmin && <TabsTrigger value="notifications">Notifications</TabsTrigger>}
             <TabsTrigger value="watchers">Watchers</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
             <GeneralTab />
           </TabsContent>
           <TabsContent value="streamers">
-            <StreamersTab />
+            <StreamersTab isAdmin={isAdmin} />
           </TabsContent>
           <TabsContent value="betting">
             <BettingTab />
           </TabsContent>
-          <TabsContent value="notifications">
-            <NotificationsTab />
-          </TabsContent>
+          {isAdmin && (
+            <TabsContent value="notifications">
+              <NotificationsTab />
+            </TabsContent>
+          )}
           <TabsContent value="watchers">
             <WatchersTab />
           </TabsContent>

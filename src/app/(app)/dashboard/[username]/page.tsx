@@ -7,8 +7,8 @@ type Props = { params: Promise<{ username: string }> };
 export default async function ConfigEditorPage({ params }: Props) {
   const { username } = await params;
   try {
-    const config = await getBotAccount(username);
-    return <ConfigEditor initialConfig={config} />;
+    const { config, isAdmin } = await getBotAccount(username);
+    return <ConfigEditor initialConfig={config} isAdmin={isAdmin} />;
   } catch {
     notFound();
   }

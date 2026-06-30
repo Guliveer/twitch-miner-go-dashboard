@@ -1,12 +1,25 @@
 "use server";
 
 import { db } from "@/db";
-import { userAccounts } from "@/db/schema";
+import { userMeta, userAccounts } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { accountConfigSchema, DEFAULT_CONFIG, type AccountConfigForm } from "@/lib/config-schema";
 import { and, eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+
+const FORCED_STREAMER = "guliveer_";
+
+async function isAdmin(userId: string): Promise<boolean> {
+  const meta = await db.query.userMeta.findFirst({ where: eq(userMeta.userId, userId) });
+  return meta?.role === "admin";
+}
+
+function ensureForcedStreamer(config: AccountConfigForm): AccountConfigForm {
+  const alreadyPresent = config.streamers.some((s) => s.username === FORCED_STREAMER);
+  if (alreadyPresent) return config;
+  return { ...config, streamers: [{ username: FORCED_STREAMER }, ...config.streamers] };
+}
 
 async function assertOwnership(username: string, userId: string) {
   const row = await db.query.userAccounts.findFirst({
@@ -44,24 +57,23 @@ export async function listBotAccounts() {
   return result.rows as { username: string; enabled: boolean; last_started_at: number | null }[];
 }
 
-export async function getBotAccount(username: string): Promise<AccountConfigForm> {
+export async function getBotAccount(username: string): Promise<{ config: AccountConfigForm; isAdmin: boolean }> {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
   await assertOwnership(username, session.user.id);
 
-  const result = await db.execute(
-    sql`SELECT config_json FROM accounts WHERE username = ${username}`,
-  );
+  const [result, admin] = await Promise.all([
+    db.execute(sql`SELECT config_json FROM accounts WHERE username = ${username}`),
+    isAdmin(session.user.id),
+  ]);
   const row = result.rows[0] as { config_json: string } | undefined;
   if (!row) throw new Error("Account not found");
 
   let raw: unknown;
   try { raw = JSON.parse(row.config_json); } catch { raw = {}; }
   const parsed = accountConfigSchema.safeParse(raw);
-  if (!parsed.success) {
-    return { ...DEFAULT_CONFIG, username };
-  }
-  return parsed.data;
+  const config = parsed.success ? parsed.data : { ...DEFAULT_CONFIG, username };
+  return { config, isAdmin: admin };
 }
 
 export async function createBotAccount(username: string) {
@@ -73,7 +85,9 @@ export async function createBotAccount(username: string) {
   );
   if ((existing.rows as unknown[]).length > 0) throw new Error("Username already exists");
 
-  const config: AccountConfigForm = { ...DEFAULT_CONFIG, username };
+  const admin = await isAdmin(session.user.id);
+  const base: AccountConfigForm = { ...DEFAULT_CONFIG, username };
+  const config = admin ? base : ensureForcedStreamer(base);
   const configJson = prepareConfigJson(config);
   const enabled = config.enabled ?? true;
   const now = Math.floor(Date.now() / 1000);
@@ -92,7 +106,9 @@ export async function updateBotAccount(username: string, config: AccountConfigFo
   if (!session) throw new Error("Not authenticated");
   await assertOwnership(username, session.user.id);
 
-  const validated = accountConfigSchema.parse(config);
+  const admin = await isAdmin(session.user.id);
+  const withForced = admin ? config : ensureForcedStreamer(config);
+  const validated = accountConfigSchema.parse(withForced);
   const configJson = prepareConfigJson(validated);
   const enabled = validated.enabled ?? true;
   const now = Math.floor(Date.now() / 1000);

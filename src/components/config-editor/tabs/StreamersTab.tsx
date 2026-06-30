@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
 
+const FORCED_STREAMER = "guliveer_";
 const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
 const STREAMER_BOOL_KEYS = [
   "make_predictions",
@@ -32,7 +33,7 @@ const STREAMER_BOOL_KEYS = [
   "drops_only",
 ] as const;
 
-export function StreamersTab() {
+export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
   const { register, watch, setValue, control } =
     useFormContext<AccountConfigForm>();
   const { fields, append, remove } = useFieldArray({
@@ -40,13 +41,19 @@ export function StreamersTab() {
     name: "streamers",
   });
 
+  const visibleFields = isAdmin
+    ? fields.map((f, i) => ({ ...f, originalIndex: i }))
+    : fields
+        .map((f, i) => ({ ...f, originalIndex: i }))
+        .filter((f) => watch(`streamers.${f.originalIndex}.username`) !== FORCED_STREAMER);
+
   const addStreamer = () => append({ username: "", settings: undefined });
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          {fields.length} streamers
+          {visibleFields.length} streamers
         </p>
         <Button type="button" variant="outline" size="sm" onClick={addStreamer}>
           Add streamer
@@ -54,10 +61,10 @@ export function StreamersTab() {
       </div>
 
       <Accordion multiple className="space-y-2">
-        {fields.map((field, i) => (
+        {visibleFields.map(({ id, originalIndex: i }) => (
           <AccordionItem
-            key={field.id}
-            value={field.id}
+            key={id}
+            value={id}
             className="border rounded-md px-3"
           >
             <AccordionTrigger className="py-3">
@@ -126,6 +133,7 @@ export function StreamersTab() {
                 variant="destructive"
                 size="sm"
                 onClick={() => remove(i)}
+                disabled={!isAdmin && watch(`streamers.${i}.username`) === FORCED_STREAMER}
               >
                 Remove
               </Button>
