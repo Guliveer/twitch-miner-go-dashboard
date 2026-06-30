@@ -33,7 +33,6 @@ export const ALL_EVENTS = [
   "MINER_STARTED",
   "MINER_STOPPED",
   "MINER_CRASHED",
-  "ACCOUNT_ADDED",
   "ACCOUNT_CONFIG_RELOADED",
   "TEST",
 ] as const;
