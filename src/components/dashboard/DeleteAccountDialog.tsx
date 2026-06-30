@@ -12,6 +12,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { deleteBotAccount } from "@/actions/accounts";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export function DeleteAccountDialog({ username }: { username: string }) {
   const [isPending, startTransition] = useTransition();
@@ -32,7 +33,9 @@ export function DeleteAccountDialog({ username }: { username: string }) {
           <Button
             variant="destructive"
             disabled={isPending}
-            onClick={() => startTransition(() => deleteBotAccount(username))}
+            onClick={() => startTransition(async () => {
+              try { await deleteBotAccount(username); } catch (e) { if (!isRedirectError(e)) throw e; }
+            })}
           >
             {isPending ? "Deleting…" : "Delete"}
           </Button>
