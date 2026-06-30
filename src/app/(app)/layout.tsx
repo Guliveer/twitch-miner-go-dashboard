@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
@@ -7,6 +8,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         <span className="font-semibold">Twitch Miner</span>
       </header>
       <main className="p-6">{children}</main>
+      <Toaster />
     </div>
   );
 }

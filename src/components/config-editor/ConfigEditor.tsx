@@ -21,6 +21,7 @@ import { NotificationsTab } from "./tabs/NotificationsTab";
 import { WatchersTab } from "./tabs/WatchersTab";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { exportConfigAsYaml } from "@/lib/export-yaml";
 
 type Props = { initialConfig: AccountConfigForm; isAdmin: boolean };
 
@@ -48,9 +49,18 @@ export function ConfigEditor({ initialConfig, isAdmin }: Props) {
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{initialConfig.username}</h1>
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving…" : "Save changes"}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => exportConfigAsYaml(methods.getValues())}
+            >
+              Download YAML
+            </Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Saving…" : "Save changes"}
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="general">
