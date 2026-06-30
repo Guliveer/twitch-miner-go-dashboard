@@ -29,7 +29,7 @@ export function WatchersTab() {
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Switch
-            checked={watch("category_watcher.enabled")}
+            checked={watch("category_watcher.enabled") ?? false}
             onCheckedChange={(v) => setValue("category_watcher.enabled", v)}
           />
           <p className="font-medium">Category Watcher</p>
@@ -44,7 +44,7 @@ export function WatchersTab() {
           </div>
           <div className="flex items-center gap-3 pt-6">
             <Switch
-              checked={watch("category_watcher.drops_only")}
+              checked={watch("category_watcher.drops_only") ?? false}
               onCheckedChange={(v) =>
                 setValue("category_watcher.drops_only", v)
               }
