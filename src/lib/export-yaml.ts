@@ -8,7 +8,8 @@ function omitEmpty(value: unknown): unknown {
   if (value === "") return undefined;
 
   if (Array.isArray(value)) {
-    return value.map(omitEmpty);
+    const mapped = value.map(omitEmpty).filter((v) => v !== undefined);
+    return mapped.length > 0 ? mapped : undefined;
   }
 
   if (typeof value === "object") {
