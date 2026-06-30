@@ -8,8 +8,9 @@ import Link from "next/link";
 export default async function AdminUsersPage() {
   const metas = await db.select().from(userMeta);
 
-  const { data: authData } = await auth.admin.listUsers({ query: {} });
-  const authUsers = (authData?.users ?? []) as { id: string; email: string }[];
+  const authResult = await auth.admin.listUsers({ query: {} });
+  if (!authResult.data) throw new Error("Failed to load users from auth provider");
+  const authUsers = authResult.data.users as { id: string; email: string }[];
 
   const users = metas.map((m) => {
     const au = authUsers.find((u) => u.id === m.userId);

@@ -20,15 +20,19 @@ type User = {
 
 export function UsersTable({ users }: { users: User[] }) {
   const [tempPassword, setTempPassword] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [pendingUserId, setPendingUserId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
 
   const handleReset = (userId: string) => {
+    setPendingUserId(userId);
     startTransition(async () => {
       try {
         const pwd = await resetUserPassword(userId);
         setTempPassword(pwd);
       } catch (e) {
         alert(e instanceof Error ? e.message : "Reset failed");
+      } finally {
+        setPendingUserId(null);
       }
     });
   };
@@ -64,10 +68,10 @@ export function UsersTable({ users }: { users: User[] }) {
                 <Button
                   variant="outline"
                   size="sm"
-                  disabled={isPending}
+                  disabled={pendingUserId === u.id}
                   onClick={() => handleReset(u.id)}
                 >
-                  Reset password
+                  {pendingUserId === u.id ? "Resetting…" : "Reset password"}
                 </Button>
               </td>
             </tr>
