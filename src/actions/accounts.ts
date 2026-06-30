@@ -55,7 +55,9 @@ export async function getBotAccount(username: string): Promise<AccountConfigForm
   const row = result.rows[0] as { config_json: string } | undefined;
   if (!row) throw new Error("Account not found");
 
-  const parsed = accountConfigSchema.safeParse(JSON.parse(row.config_json));
+  let raw: unknown;
+  try { raw = JSON.parse(row.config_json); } catch { raw = {}; }
+  const parsed = accountConfigSchema.safeParse(raw);
   if (!parsed.success) {
     return { ...DEFAULT_CONFIG, username };
   }
@@ -71,8 +73,8 @@ export async function createBotAccount(username: string) {
   );
   if ((existing.rows as unknown[]).length > 0) throw new Error("Username already exists");
 
-  const config: AccountConfigForm = stripEmptyStrings({ ...DEFAULT_CONFIG, username });
-  const configJson = JSON.stringify(config);
+  const config: AccountConfigForm = { ...DEFAULT_CONFIG, username };
+  const configJson = prepareConfigJson(config);
   const enabled = config.enabled ?? true;
   const now = Math.floor(Date.now() / 1000);
 
@@ -107,20 +109,10 @@ export async function toggleEnabled(username: string, enabled: boolean) {
   if (!session) throw new Error("Not authenticated");
   await assertOwnership(username, session.user.id);
 
-  const result = await db.execute(
-    sql`SELECT config_json FROM accounts WHERE username = ${username}`,
-  );
-  const row = result.rows[0] as { config_json: string } | undefined;
-  if (!row) throw new Error("Account not found");
-
-  const parsed = accountConfigSchema.safeParse(JSON.parse(row.config_json));
-  const currentConfig = parsed.success ? parsed.data : { ...DEFAULT_CONFIG, username };
-  const updatedConfig: AccountConfigForm = { ...currentConfig, enabled };
-  const configJson = prepareConfigJson(updatedConfig);
   const now = Math.floor(Date.now() / 1000);
 
   await db.execute(
-    sql`UPDATE accounts SET enabled = ${enabled}, config_json = ${configJson}, updated_at = ${now} WHERE username = ${username}`,
+    sql`UPDATE accounts SET enabled = ${enabled}, config_json = (config_json::jsonb || jsonb_build_object('enabled', ${enabled}))::text, updated_at = ${now} WHERE username = ${username}`,
   );
 
   revalidatePath("/dashboard");
@@ -131,10 +123,10 @@ export async function deleteBotAccount(username: string) {
   if (!session) throw new Error("Not authenticated");
   await assertOwnership(username, session.user.id);
 
-  await db.execute(sql`DELETE FROM accounts WHERE username = ${username}`);
   await db.delete(userAccounts).where(
     and(eq(userAccounts.botUsername, username), eq(userAccounts.userId, session.user.id)),
   );
+  await db.execute(sql`DELETE FROM accounts WHERE username = ${username}`);
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
