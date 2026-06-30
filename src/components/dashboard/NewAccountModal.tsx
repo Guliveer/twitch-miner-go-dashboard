@@ -15,6 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createBotAccount } from "@/actions/accounts";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 const schema = z.object({
   username: z.string().min(1).max(25).regex(/^[a-zA-Z0-9_]+$/, "Letters, numbers, underscores only"),
@@ -38,6 +39,7 @@ export function NewAccountModal() {
         setOpen(false);
         reset();
       } catch (e) {
+        if (isRedirectError(e)) return;
         setError(e instanceof Error ? e.message : "Failed to create account");
       }
     });
