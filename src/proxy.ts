@@ -34,7 +34,7 @@ async function getSessionFromRequest(req: NextRequest) {
   });
   if (!res.ok) return null;
   const data = await res.json().catch(() => null);
-  if (!data?.user?.id) return null;
+  if (!data?.session || !data?.user?.id) return null;
   return data as { session: unknown; user: { id: string } };
 }
 
