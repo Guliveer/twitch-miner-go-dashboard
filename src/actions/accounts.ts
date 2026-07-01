@@ -15,10 +15,12 @@ async function isAdmin(userId: string): Promise<boolean> {
   return meta?.role === "admin";
 }
 
-function ensureForcedStreamer(config: AccountConfigForm): AccountConfigForm {
-  const alreadyPresent = config.streamers.some((s) => s.username === FORCED_STREAMER);
-  if (alreadyPresent) return config;
-  return { ...config, streamers: [{ username: FORCED_STREAMER }, ...config.streamers] };
+function enforceNonAdminConfig(config: AccountConfigForm): AccountConfigForm {
+  // Ensure forced streamer is present with no custom settings (reset any settings the user may have set)
+  const withoutForced = config.streamers.filter((s) => s.username !== FORCED_STREAMER);
+  const streamers = [{ username: FORCED_STREAMER }, ...withoutForced];
+  // Non-admins cannot configure notifications — clear any values they may have submitted
+  return { ...config, streamers, notifications: {} };
 }
 
 async function assertOwnership(username: string, userId: string) {
@@ -87,7 +89,7 @@ export async function createBotAccount(username: string) {
 
   const admin = await isAdmin(session.user.id);
   const base: AccountConfigForm = { ...DEFAULT_CONFIG, username };
-  const config = admin ? base : ensureForcedStreamer(base);
+  const config = admin ? base : enforceNonAdminConfig(base);
   const configJson = prepareConfigJson(config);
   const enabled = config.enabled ?? true;
   const now = Math.floor(Date.now() / 1000);
@@ -107,8 +109,10 @@ export async function updateBotAccount(username: string, config: AccountConfigFo
   await assertOwnership(username, session.user.id);
 
   const admin = await isAdmin(session.user.id);
-  const withForced = admin ? config : ensureForcedStreamer(config);
-  const validated = accountConfigSchema.parse(withForced);
+  const sanitised = admin ? config : enforceNonAdminConfig(config);
+  const validated = accountConfigSchema.parse(sanitised);
+  // Prevent username field inside config_json from diverging from the URL parameter
+  validated.username = username;
   const configJson = prepareConfigJson(validated);
   const enabled = validated.enabled ?? true;
   const now = Math.floor(Date.now() / 1000);
@@ -139,10 +143,12 @@ export async function deleteBotAccount(username: string) {
   if (!session) throw new Error("Not authenticated");
   await assertOwnership(username, session.user.id);
 
-  await db.delete(userAccounts).where(
-    and(eq(userAccounts.botUsername, username), eq(userAccounts.userId, session.user.id)),
-  );
-  await db.execute(sql`DELETE FROM accounts WHERE username = ${username}`);
+  await db.batch([
+    db.delete(userAccounts).where(
+      and(eq(userAccounts.botUsername, username), eq(userAccounts.userId, session.user.id)),
+    ),
+    db.execute(sql`DELETE FROM accounts WHERE username = ${username}`),
+  ]);
 
   revalidatePath("/dashboard");
   redirect("/dashboard");
