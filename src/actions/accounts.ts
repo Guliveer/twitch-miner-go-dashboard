@@ -10,13 +10,13 @@ import { revalidatePath } from "next/cache";
 
 const FORCED_STREAMER = "guliveer_";
 
-function coerceNullArrays(obj: unknown): unknown {
-  if (Array.isArray(obj)) return obj.map(coerceNullArrays);
+function coerceNullToUndefined(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(coerceNullToUndefined);
   if (obj !== null && typeof obj === "object") {
     return Object.fromEntries(
       Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
         k,
-        v === null ? [] : coerceNullArrays(v),
+        v === null ? undefined : coerceNullToUndefined(v),
       ])
     );
   }
@@ -84,10 +84,10 @@ export async function getBotAccount(username: string): Promise<{ config: Account
   const row = result.rows[0] as { config_json: string } | undefined;
   if (!row) throw new Error("Account not found");
 
-  let raw: unknown;
-  try { raw = coerceNullArrays(JSON.parse(row.config_json)); } catch { raw = {}; }
-  const parsed = accountConfigSchema.safeParse(raw);
-  const config = parsed.success ? parsed.data : { ...DEFAULT_CONFIG, username };
+  let raw: Record<string, unknown> = {};
+  try { raw = coerceNullToUndefined(JSON.parse(row.config_json)) as Record<string, unknown>; } catch { /* ignore */ }
+  // Merge with defaults so new/missing fields always have a value for the form
+  const config = { ...DEFAULT_CONFIG, ...raw, username } as AccountConfigForm;
   return { config, isAdmin: admin };
 }
 

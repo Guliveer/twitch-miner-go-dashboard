@@ -96,7 +96,7 @@ const telegramSchema = z.object({
   enabled: z.boolean(),
   token: z.string().optional(),
   chat_id: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   disable_notification: z.boolean(),
   batch: batchConfigSchema.optional(),
 });
@@ -104,7 +104,7 @@ const telegramSchema = z.object({
 const discordSchema = z.object({
   enabled: z.boolean(),
   webhook_url: z.string().url().optional().or(z.literal("")),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -112,7 +112,7 @@ const webhookSchema = z.object({
   enabled: z.boolean(),
   endpoint: z.string().url().optional().or(z.literal("")),
   method: z.enum(WEBHOOK_METHODS),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -121,7 +121,7 @@ const matrixSchema = z.object({
   homeserver: z.string().optional(),
   room_id: z.string().optional(),
   access_token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -129,7 +129,7 @@ const pushoverSchema = z.object({
   enabled: z.boolean(),
   user_key: z.string().optional(),
   api_token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -137,7 +137,7 @@ const gotifySchema = z.object({
   enabled: z.boolean(),
   url: z.string().url().optional().or(z.literal("")),
   token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)),
+  events: z.array(z.enum(ALL_EVENTS)).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -165,17 +165,17 @@ export const accountConfigSchema = z.object({
     enabled: z.boolean(),
     poll_interval: durationString.optional(),
     drops_only: z.boolean(),
-    categories: z.array(categoryConfigSchema),
+    categories: z.array(categoryConfigSchema).catch([]),
   }),
   team_watcher: z.object({
     enabled: z.boolean(),
     poll_interval: durationString.optional(),
-    teams: z.array(z.object({ name: z.string().min(1) })),
+    teams: z.array(z.object({ name: z.string().min(1) })).catch([]),
   }),
   streamer_defaults: streamerSettingsSchema,
-  streamers: z.array(streamerConfigSchema),
-  blacklist: z.array(z.string()),
-  category_blacklist: z.array(z.string()),
+  streamers: z.array(streamerConfigSchema).catch([]),
+  blacklist: z.array(z.string()).catch([]),
+  category_blacklist: z.array(z.string()).catch([]),
   followers: z.object({
     enabled: z.boolean(),
     order: z.enum(FOLLOWERS_ORDERS),

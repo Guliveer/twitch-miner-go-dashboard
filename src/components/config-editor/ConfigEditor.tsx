@@ -1,11 +1,7 @@
 "use client";
 
 import { useForm, FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  accountConfigSchema,
-  type AccountConfigForm,
-} from "@/lib/config-schema";
+import { type AccountConfigForm } from "@/lib/config-schema";
 import { updateBotAccount } from "@/actions/accounts";
 import Link from "next/link";
 import {
@@ -30,7 +26,6 @@ type Props = { initialConfig: AccountConfigForm; isAdmin: boolean };
 
 export function ConfigEditor({ initialConfig, isAdmin }: Props) {
   const methods = useForm<AccountConfigForm>({
-    resolver: zodResolver(accountConfigSchema),
     defaultValues: initialConfig,
   });
 
