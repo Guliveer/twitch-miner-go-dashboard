@@ -7,13 +7,15 @@ import {
   type AccountConfigForm,
 } from "@/lib/config-schema";
 import { updateBotAccount } from "@/actions/accounts";
+import Link from "next/link";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { GeneralTab } from "./tabs/GeneralTab";
 import { StreamersTab } from "./tabs/StreamersTab";
 import { BettingTab } from "./tabs/BettingTab";
@@ -48,7 +50,15 @@ export function ConfigEditor({ initialConfig, isAdmin }: Props) {
     <FormProvider {...methods}>
       <form onSubmit={onSubmit} className="space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">{initialConfig.username}</h1>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+            >
+              ← Back
+            </Link>
+            <h1 className="text-2xl font-bold">{initialConfig.username}</h1>
+          </div>
           <div className="flex gap-2">
             <Button
               type="button"
