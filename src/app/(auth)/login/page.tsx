@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LogIn, Tv2 } from "lucide-react";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 const schema = z.object({
   email: z.string().email(),
@@ -29,6 +30,7 @@ export default function LoginPage() {
     try {
       await signIn(data.email, data.password);
     } catch (e) {
+      if (isRedirectError(e)) return;
       setError(e instanceof Error ? e.message : "Login failed");
     }
   };

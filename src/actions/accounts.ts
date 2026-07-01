@@ -72,6 +72,13 @@ export async function createBotAccount(username: string) {
   if ((existing.rows as unknown[]).length > 0) throw new Error("Username already exists");
 
   const admin = await isAdmin(session.user.id);
+
+  if (!admin) {
+    const owned = await db.query.userAccounts.findMany({
+      where: eq(userAccounts.userId, session.user.id),
+    });
+    if (owned.length >= 1) throw new Error("Non-admin accounts are limited to 1 bot account. Set up twitch-miner-go yourself to remove this limit.");
+  }
   const base: AccountConfigForm = { ...DEFAULT_CONFIG, username };
   const config = admin ? base : enforceNonAdminConfig(base);
   const configJson = prepareConfigJson(config);

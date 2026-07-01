@@ -15,7 +15,7 @@ type Account = {
 
 type Filter = "all" | "enabled" | "disabled";
 
-export function AccountsGrid({ accounts }: { accounts: Account[] }) {
+export function AccountsGrid({ accounts, compact = false }: { accounts: Account[]; compact?: boolean }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -34,7 +34,7 @@ export function AccountsGrid({ accounts }: { accounts: Account[] }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 flex-wrap">
+      {!compact && <div className="flex items-center gap-2 flex-wrap">
         <Input
           placeholder="Search accounts…"
           value={search}
@@ -73,7 +73,7 @@ export function AccountsGrid({ accounts }: { accounts: Account[] }) {
           </Badge>
           <span>/ {accounts.length} total</span>
         </div>
-      </div>
+      </div>}
 
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
