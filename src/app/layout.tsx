@@ -17,6 +17,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Twitch Miner Dashboard",
   description: "Manage twitch-miner-go bot configurations",
+  icons: {
+    icon: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({

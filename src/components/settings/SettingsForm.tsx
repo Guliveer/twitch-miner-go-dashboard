@@ -8,9 +8,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { updateDisplayName, changePasswordWithVerification } from "@/actions/auth";
 import { toast } from "sonner";
+import { Bot, Clock, RefreshCw } from "lucide-react";
+
+type BotAccountRow = {
+  username: string;
+  enabled: boolean;
+  updated_at: number;
+  last_started_at: number | null;
+};
+
+function formatDate(epochSec: number): string {
+  return new Date(epochSec * 1000).toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+}
 
 const nameSchema = z.object({ name: z.string().min(1, "Name is required") });
 const passwordSchema = z
@@ -27,7 +48,7 @@ const passwordSchema = z
 type NameFields = z.infer<typeof nameSchema>;
 type PasswordFields = z.infer<typeof passwordSchema>;
 
-export function SettingsForm({ name, email }: { name: string; email: string }) {
+export function SettingsForm({ name, email, botAccounts = [] }: { name: string; email: string; botAccounts?: BotAccountRow[] }) {
   const [isPendingName, startNameTransition] = useTransition();
   const [isPendingPwd, startPwdTransition] = useTransition();
 
@@ -150,6 +171,48 @@ export function SettingsForm({ name, email }: { name: string; email: string }) {
           </form>
         </CardContent>
       </Card>
+
+      {botAccounts.length > 0 && (
+        <>
+          <div className="relative flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wide">Bot accounts</span>
+            <Separator className="flex-1" />
+          </div>
+
+          <div className="space-y-3">
+            {botAccounts.map((a) => (
+              <Card key={a.username}>
+                <CardContent className="pt-4 pb-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-medium">
+                      <Bot className="h-4 w-4 text-muted-foreground" />
+                      {a.username}
+                    </div>
+                    <Badge variant={a.enabled ? "default" : "secondary"}>
+                      {a.enabled ? "Enabled" : "Disabled"}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-1 gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3.5 w-3.5 shrink-0" />
+                      <span className="text-foreground/60">Last saved:</span>
+                      <span>{formatDate(a.updated_at)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <RefreshCw className="h-3.5 w-3.5 shrink-0" />
+                      <span className="text-foreground/60">Last started:</span>
+                      <span>
+                        {a.last_started_at ? formatDate(a.last_started_at) : "Never"}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
