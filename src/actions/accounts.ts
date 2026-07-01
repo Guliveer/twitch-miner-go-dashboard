@@ -53,7 +53,7 @@ export async function listBotAccounts() {
 
   const usernames = rows.map((r) => r.botUsername);
   const result = await db.execute(
-    sql`SELECT username, enabled, last_started_at FROM accounts WHERE username = ANY(${usernames}::text[])`,
+    sql`SELECT username, enabled, last_started_at FROM accounts WHERE username = ANY(ARRAY[${sql.join(usernames.map((u) => sql`${u}`), sql`, `)}]::text[])`,
   );
 
   return result.rows as { username: string; enabled: boolean; last_started_at: number | null }[];
