@@ -1,9 +1,11 @@
-import { pgTable, text, boolean, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, text, boolean, primaryKey, pgEnum } from "drizzle-orm/pg-core";
+
+export const userRoleEnum = pgEnum("user_role", ["user", "admin"]);
 
 export const userMeta = pgTable("user_meta", {
   userId: text("user_id").primaryKey(),
   mustChangePassword: boolean("must_change_password").notNull().default(true),
-  role: text("role").notNull().default("user"),
+  role: userRoleEnum("role").notNull().default("user"),
 });
 
 export const userAccounts = pgTable(

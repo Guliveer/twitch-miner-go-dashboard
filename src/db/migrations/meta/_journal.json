@@ -8,6 +8,13 @@
       "when": 1782850194131,
       "tag": "0000_wandering_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782926377939,
+      "tag": "0001_bright_warstar",
+      "breakpoints": true
     }
   ]
 }
