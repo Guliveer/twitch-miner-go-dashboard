@@ -5,7 +5,6 @@ import type { AccountConfigForm } from "@/lib/config-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -90,16 +89,30 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
 
               <div className="grid grid-cols-2 gap-3">
                 {STREAMER_BOOL_KEYS.map((key) => (
-                  <div key={key} className="flex items-center gap-2">
-                    <Switch
-                      checked={
-                        watch(`streamers.${i}.settings.${key}`) ?? false
-                      }
-                      onCheckedChange={(v) =>
-                        setValue(`streamers.${i}.settings.${key}`, v)
-                      }
-                    />
+                  <div key={key} className="space-y-1">
                     <Label className="text-xs">{key.replace(/_/g, " ")}</Label>
+                    <Select
+                      value={
+                        watch(`streamers.${i}.settings.${key}`) === undefined
+                          ? ""
+                          : String(watch(`streamers.${i}.settings.${key}`))
+                      }
+                      onValueChange={(v) =>
+                        setValue(
+                          `streamers.${i}.settings.${key}`,
+                          v === "" ? undefined : v === "true",
+                        )
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Inherit</SelectItem>
+                        <SelectItem value="true">On</SelectItem>
+                        <SelectItem value="false">Off</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 ))}
               </div>
@@ -107,11 +120,11 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
               <div className="space-y-1">
                 <Label>Chat presence</Label>
                 <Select
-                  value={watch(`streamers.${i}.settings.chat`) ?? "ONLINE"}
+                  value={watch(`streamers.${i}.settings.chat`) ?? ""}
                   onValueChange={(v) =>
                     setValue(
                       `streamers.${i}.settings.chat`,
-                      v as (typeof CHAT_MODES)[number],
+                      v === "" ? undefined : (v as (typeof CHAT_MODES)[number]),
                     )
                   }
                 >
@@ -119,6 +132,7 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">Inherit</SelectItem>
                     {CHAT_MODES.map((m) => (
                       <SelectItem key={m} value={m}>
                         {m}

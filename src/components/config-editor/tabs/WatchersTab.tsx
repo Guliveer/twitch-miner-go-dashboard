@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { DurationInput } from "../shared/DurationInput";
+import { X } from "lucide-react";
 
 export function WatchersTab() {
   const { register, watch, setValue, control } =
@@ -40,6 +41,7 @@ export function WatchersTab() {
             <DurationInput
               value={watch("category_watcher.poll_interval") ?? "2m0s"}
               onChange={(v) => setValue("category_watcher.poll_interval", v)}
+              className="max-w-xs"
             />
           </div>
           <div className="flex items-center gap-3 pt-6">
@@ -60,6 +62,7 @@ export function WatchersTab() {
               <Input
                 {...register(`category_watcher.categories.${i}.slug`)}
                 placeholder="just-chatting"
+                className="max-w-xs"
               />
               <div className="flex items-center gap-2 min-w-fit">
                 <Switch
@@ -82,7 +85,7 @@ export function WatchersTab() {
                 size="sm"
                 onClick={() => removeCat(i)}
               >
-                ✕
+                <X className="h-4 w-4" />
               </Button>
             </div>
           ))}
@@ -113,6 +116,7 @@ export function WatchersTab() {
           <DurationInput
             value={watch("team_watcher.poll_interval") ?? "2m0s"}
             onChange={(v) => setValue("team_watcher.poll_interval", v)}
+            className="max-w-xs"
           />
         </div>
         <div className="space-y-2">
@@ -122,6 +126,7 @@ export function WatchersTab() {
               <Input
                 {...register(`team_watcher.teams.${i}.name`)}
                 placeholder="rainbow6"
+                className="max-w-xs"
               />
               <Button
                 type="button"
@@ -129,7 +134,7 @@ export function WatchersTab() {
                 size="sm"
                 onClick={() => removeTeam(i)}
               >
-                ✕
+                <X className="h-4 w-4" />
               </Button>
             </div>
           ))}

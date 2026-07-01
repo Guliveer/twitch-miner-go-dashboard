@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { userMeta } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { neon } from "@neondatabase/serverless";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -8,9 +8,8 @@ import Link from "next/link";
 export default async function AdminUsersPage() {
   const metas = await db.select().from(userMeta);
 
-  const authResult = await auth.admin.listUsers({ query: {} });
-  if (!authResult.data) throw new Error("Failed to load users from auth provider");
-  const authUsers = authResult.data.users as { id: string; email: string }[];
+  const sql = neon(process.env.DB_DSN!);
+  const authUsers = await sql`SELECT id, email FROM neon_auth."user"` as { id: string; email: string }[];
 
   const users = metas.map((m) => {
     const au = authUsers.find((u) => u.id === m.userId);
