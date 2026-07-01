@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { resetUserPassword } from "@/actions/auth";
+import { KeyRound } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
 type User = {
   id: string;
   email: string;
+  name: string | null;
   mustChangePassword: boolean;
   role: string;
 };
@@ -42,6 +44,7 @@ export function UsersTable({ users }: { users: User[] }) {
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b text-left">
+            <th className="pb-2 pr-4">Name</th>
             <th className="pb-2 pr-4">Email</th>
             <th className="pb-2 pr-4">Role</th>
             <th className="pb-2 pr-4">Must change password</th>
@@ -50,7 +53,10 @@ export function UsersTable({ users }: { users: User[] }) {
         </thead>
         <tbody>
           {users.map((u) => (
-            <tr key={u.id} className="border-b">
+            <tr key={u.id} className="border-b [&:nth-child(even)]:bg-muted/30">
+              <td className="py-2 pr-4 text-muted-foreground">
+                {u.name ?? <span className="italic">—</span>}
+              </td>
               <td className="py-2 pr-4">{u.email}</td>
               <td className="py-2 pr-4">
                 <Badge variant={u.role === "admin" ? "default" : "secondary"}>
@@ -71,6 +77,7 @@ export function UsersTable({ users }: { users: User[] }) {
                   disabled={pendingUserId === u.id}
                   onClick={() => handleReset(u.id)}
                 >
+                  <KeyRound className="h-4 w-4" />
                   {pendingUserId === u.id ? "Resetting…" : "Reset password"}
                 </Button>
               </td>
@@ -90,11 +97,7 @@ export function UsersTable({ users }: { users: User[] }) {
           <code className="block bg-muted p-3 rounded font-mono text-lg select-all">
             {tempPassword}
           </code>
-          <Button
-            onClick={() => {
-              navigator.clipboard.writeText(tempPassword ?? "");
-            }}
-          >
+          <Button onClick={() => { navigator.clipboard.writeText(tempPassword ?? ""); }}>
             Copy
           </Button>
         </DialogContent>

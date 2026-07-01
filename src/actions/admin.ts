@@ -3,7 +3,8 @@
 import { db } from "@/db";
 import { userMeta, userAccounts } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq, sql, notInArray } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { neon } from "@neondatabase/serverless";
 import { revalidatePath } from "next/cache";
 
 async function assertAdmin() {
@@ -17,12 +18,13 @@ export async function listUnclaimedAccounts(): Promise<string[]> {
   await assertAdmin();
   const claimed = await db.select({ botUsername: userAccounts.botUsername }).from(userAccounts);
   const claimedNames = claimed.map((r) => r.botUsername);
+  const sql = neon(process.env.DB_DSN!);
 
-  const result = claimedNames.length > 0
-    ? await db.execute(sql`SELECT username FROM accounts WHERE username != ALL(${claimedNames}::text[])`)
-    : await db.execute(sql`SELECT username FROM accounts`);
+  const rows = claimedNames.length > 0
+    ? await sql`SELECT username FROM accounts WHERE username != ALL(${claimedNames}::text[])`
+    : await sql`SELECT username FROM accounts`;
 
-  return (result.rows as { username: string }[]).map((r) => r.username);
+  return (rows as { username: string }[]).map((r) => r.username);
 }
 
 export async function claimAccountForUser(botUsername: string, targetUserId: string): Promise<void> {

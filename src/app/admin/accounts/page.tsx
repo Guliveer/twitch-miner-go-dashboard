@@ -1,22 +1,21 @@
 import { listUnclaimedAccounts } from "@/actions/admin";
 import { db } from "@/db";
 import { userMeta } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { neon } from "@neondatabase/serverless";
 import { ClaimAccountForm } from "@/components/admin/ClaimAccountForm";
 
 export default async function AdminAccountsPage() {
-  const [unclaimed, metas, authResult] = await Promise.all([
+  const sql = neon(process.env.DB_DSN!);
+
+  const [unclaimed, metas, authUsers] = await Promise.all([
     listUnclaimedAccounts(),
     db.select().from(userMeta),
-    auth.admin.listUsers({ query: {} }),
+    sql`SELECT id, email, name FROM neon_auth."user"` as unknown as Promise<{ id: string; email: string; name: string }[]>,
   ]);
 
-  if (!authResult.data) throw new Error("Failed to load users");
-  const authUsers = authResult.data.users as { id: string; email: string }[];
-
   const users = metas.map((m) => {
-    const au = authUsers.find((u) => u.id === m.userId);
-    return { id: m.userId, email: au?.email ?? "unknown" };
+    const au = (authUsers as { id: string; email: string; name: string }[]).find((u) => u.id === m.userId);
+    return { id: m.userId, label: au?.name || au?.email || "unknown" };
   });
 
   return (

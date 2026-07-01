@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Users, Bot, LayoutDashboard } from "lucide-react";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
@@ -22,11 +23,20 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="mx-auto max-w-5xl px-6 py-3 flex items-center gap-6">
           <span className="font-semibold">Admin</span>
           <nav className="flex gap-4 text-sm">
-            <Link href="/admin/users" className="text-muted-foreground hover:text-foreground transition-colors">Users</Link>
-            <Link href="/admin/accounts" className="text-muted-foreground hover:text-foreground transition-colors">Bot accounts</Link>
+            <Link href="/admin/users" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Users className="h-4 w-4" />
+              Users
+            </Link>
+            <Link href="/admin/accounts" className="flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors">
+              <Bot className="h-4 w-4" />
+              Bot accounts
+            </Link>
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">← Dashboard</Link>
+            <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+              <LayoutDashboard className="h-4 w-4" />
+              Dashboard
+            </Link>
             <ThemeToggle />
           </div>
         </div>

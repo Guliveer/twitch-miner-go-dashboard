@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { AccountCard } from "./AccountCard";
+import { SearchX } from "lucide-react";
 
 type Account = {
   username: string;
@@ -54,13 +55,18 @@ export function AccountsGrid({ accounts }: { accounts: Account[] }) {
           </SelectContent>
         </Select>
         <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
-          <Badge variant="default">{activeCount} active</Badge>
+          <Badge variant={activeCount > 0 ? "default" : "secondary"}>
+            {activeCount} active
+          </Badge>
           <span>/ {accounts.length} total</span>
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No accounts match your search.</p>
+        <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+          <SearchX className="h-8 w-8 opacity-50" />
+          <p className="text-sm">No accounts match your search.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((a) => (

@@ -10,6 +10,7 @@ export function Footer() {
       >
         twitch-miner-go
       </a>
+      {" · © 2026"}
     </footer>
   );
 }

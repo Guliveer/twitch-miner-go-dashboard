@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { deleteBotAccount } from "@/actions/accounts";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { Trash2 } from "lucide-react";
 
 export function DeleteAccountDialog({ username }: { username: string }) {
   const [isPending, startTransition] = useTransition();
@@ -20,6 +21,7 @@ export function DeleteAccountDialog({ username }: { username: string }) {
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="destructive" size="sm" />}>
+        <Trash2 className="h-4 w-4" />
         Delete
       </DialogTrigger>
       <DialogContent>

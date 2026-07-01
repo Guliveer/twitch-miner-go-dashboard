@@ -4,36 +4,18 @@ import { db } from "@/db";
 import { userMeta, userAccounts } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { accountConfigSchema, DEFAULT_CONFIG, type AccountConfigForm } from "@/lib/config-schema";
+import {
+  coerceNullToUndefined,
+  enforceNonAdminConfig,
+  prepareConfigJson,
+} from "@/lib/config-transform";
 import { and, eq, sql } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-const FORCED_STREAMER = "guliveer_";
-
-function coerceNullToUndefined(obj: unknown): unknown {
-  if (Array.isArray(obj)) return obj.map(coerceNullToUndefined);
-  if (obj !== null && typeof obj === "object") {
-    return Object.fromEntries(
-      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
-        k,
-        v === null ? undefined : coerceNullToUndefined(v),
-      ])
-    );
-  }
-  return obj;
-}
-
 async function isAdmin(userId: string): Promise<boolean> {
   const meta = await db.query.userMeta.findFirst({ where: eq(userMeta.userId, userId) });
   return meta?.role === "admin";
-}
-
-function enforceNonAdminConfig(config: AccountConfigForm): AccountConfigForm {
-  // Ensure forced streamer is present with no custom settings (reset any settings the user may have set)
-  const withoutForced = config.streamers.filter((s) => s.username !== FORCED_STREAMER);
-  const streamers = [{ username: FORCED_STREAMER }, ...withoutForced];
-  // Non-admins cannot configure notifications — clear any values they may have submitted
-  return { ...config, streamers, notifications: {} };
 }
 
 async function assertOwnership(username: string, userId: string) {
@@ -41,17 +23,6 @@ async function assertOwnership(username: string, userId: string) {
     where: and(eq(userAccounts.botUsername, username), eq(userAccounts.userId, userId)),
   });
   if (!row) throw new Error("Forbidden");
-}
-
-function stripEmptyStrings<T extends object>(obj: T): T {
-  return Object.fromEntries(
-    Object.entries(obj).filter(([, v]) => v !== ""),
-  ) as T;
-}
-
-function prepareConfigJson(config: AccountConfigForm): string {
-  const stripped = stripEmptyStrings(config);
-  return JSON.stringify(stripped);
 }
 
 export async function listBotAccounts() {

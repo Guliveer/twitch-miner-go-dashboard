@@ -8,6 +8,7 @@ import { changePassword } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { KeyRound } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -78,6 +79,7 @@ export default function ChangePasswordPage() {
             </div>
             {error && <p className="text-sm text-destructive">{error}</p>}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <KeyRound className="h-4 w-4" />
               {isSubmitting ? "Saving…" : "Set password"}
             </Button>
           </form>

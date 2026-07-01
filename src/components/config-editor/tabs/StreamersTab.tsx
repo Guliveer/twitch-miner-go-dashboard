@@ -5,6 +5,7 @@ import type { AccountConfigForm } from "@/lib/config-schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -49,7 +50,44 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
   const addStreamer = () => append({ username: "", settings: undefined });
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
+      {/* Default settings for all streamers */}
+      <div className="rounded-md border p-4 space-y-4">
+        <p className="text-sm font-medium">Default settings for all streamers</p>
+        <p className="text-xs text-muted-foreground -mt-2">
+          These apply to every streamer unless overridden individually below.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          {STREAMER_BOOL_KEYS.map((key) => (
+            <div key={key} className="flex items-center gap-2">
+              <Switch
+                checked={watch(`streamer_defaults.${key}`) ?? false}
+                onCheckedChange={(v) => setValue(`streamer_defaults.${key}`, v)}
+              />
+              <Label className="text-xs">{key.replace(/_/g, " ")}</Label>
+            </div>
+          ))}
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">Default chat presence</Label>
+          <Select
+            value={watch("streamer_defaults.chat") ?? "ONLINE"}
+            onValueChange={(v) => setValue("streamer_defaults.chat", v as typeof CHAT_MODES[number])}
+          >
+            <SelectTrigger className="max-w-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CHAT_MODES.map((m) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
           {visibleFields.length} streamers
@@ -105,12 +143,14 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                       }
                     >
                       <SelectTrigger className="h-8 text-xs">
-                        <SelectValue />
+                        <SelectValue placeholder="Inherit from defaults" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Inherit</SelectItem>
-                        <SelectItem value="true">On</SelectItem>
-                        <SelectItem value="false">Off</SelectItem>
+                        <SelectItem value="">
+                          <span className="text-muted-foreground italic">Inherit from defaults</span>
+                        </SelectItem>
+                        <SelectItem value="true">✓ On</SelectItem>
+                        <SelectItem value="false">✗ Off</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -129,10 +169,12 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Inherit from defaults" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Inherit</SelectItem>
+                    <SelectItem value="">
+                      <span className="text-muted-foreground italic">Inherit from defaults</span>
+                    </SelectItem>
                     {CHAT_MODES.map((m) => (
                       <SelectItem key={m} value={m}>
                         {m}
