@@ -1,5 +1,5 @@
 import { listBotAccounts } from "@/actions/accounts";
-import { AccountCard } from "@/components/dashboard/AccountCard";
+import { AccountsGrid } from "@/components/dashboard/AccountsGrid";
 import { NewAccountModal } from "@/components/dashboard/NewAccountModal";
 
 export default async function DashboardPage() {
@@ -14,16 +14,7 @@ export default async function DashboardPage() {
       {accounts.length === 0 ? (
         <p className="text-muted-foreground">No accounts yet. Add one to get started.</p>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {accounts.map((a) => (
-            <AccountCard
-              key={a.username}
-              username={a.username}
-              enabled={a.enabled}
-              lastStartedAt={a.last_started_at}
-            />
-          ))}
-        </div>
+        <AccountsGrid accounts={accounts} />
       )}
     </div>
   );
