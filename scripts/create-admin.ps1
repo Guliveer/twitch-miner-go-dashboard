@@ -3,7 +3,6 @@ $ErrorActionPreference = "Stop"
 
 $rootDir = Split-Path $PSScriptRoot -Parent
 
-# Load .env
 foreach ($line in Get-Content (Join-Path $rootDir ".env")) {
     if ($line -match '^\s*([^#][^=]*)=(.+)$') {
         [System.Environment]::SetEnvironmentVariable($Matches[1].Trim(), $Matches[2].Trim(), "Process")
@@ -43,7 +42,7 @@ try {
 
 $userId = if ($r.data.user.id) { $r.data.user.id } else { $r.user.id }
 if (-not $userId) {
-    Write-Host "ERROR: Could not get user ID from response:" -ForegroundColor Red
+    Write-Host "ERROR: No user ID in response:" -ForegroundColor Red
     $r | ConvertTo-Json -Depth 5
     exit 1
 }
@@ -52,8 +51,10 @@ Write-Host "Auth account created. User ID: $userId"
 Write-Host "Inserting admin role into database..."
 
 $sql = "INSERT INTO user_meta (user_id, must_change_password, role) VALUES ('$userId', false, 'admin') ON CONFLICT (user_id) DO UPDATE SET role = 'admin', must_change_password = false;"
-& psql $dbDsn -c $sql
+$env:PGPASSWORD = ""
+$result = $sql | & psql --no-psqlrc $dbDsn
 
+Write-Host $result
 Write-Host ""
 Write-Host "Done! Log in at /login with:" -ForegroundColor Green
 Write-Host "  Email: $email"
