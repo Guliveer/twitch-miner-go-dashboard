@@ -7,6 +7,11 @@ import { eq } from "drizzle-orm";
 import { generatePassword } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
+export async function signOut() {
+  await auth.signOut();
+  redirect("/login");
+}
+
 export async function signIn(email: string, password: string) {
   const result = await auth.signIn.email({ email, password });
   if (result.error) throw new Error(result.error.message);

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTransition } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Tv2, ShieldCheck, Settings, User } from "lucide-react";
+import { Tv2, ShieldCheck, Settings, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { signOut } from "@/actions/auth";
 
 type Props = {
   isAdmin?: boolean;
@@ -20,6 +22,7 @@ type Props = {
 
 export function Navbar({ isAdmin }: Props) {
   const pathname = usePathname();
+  const [isPending, startTransition] = useTransition();
 
   const navLink = (href: string, label: string, icon: React.ReactNode) => {
     const active = pathname === href || pathname.startsWith(href + "/");
@@ -35,9 +38,7 @@ export function Navbar({ isAdmin }: Props) {
       >
         {icon}
         {label}
-        {active && (
-          <span className="sr-only">(current)</span>
-        )}
+        {active && <span className="sr-only">(current)</span>}
       </Link>
     );
   };
@@ -72,6 +73,15 @@ export function Navbar({ isAdmin }: Props) {
                   <Settings className="h-4 w-4" />
                   Settings
                 </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={() => startTransition(() => signOut())}
+                disabled={isPending}
+                className="text-destructive focus:text-destructive cursor-pointer"
+              >
+                <LogOut className="h-4 w-4" />
+                {isPending ? "Signing out…" : "Sign out"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AccountCard } from "./AccountCard";
 import { SearchX } from "lucide-react";
@@ -13,47 +13,60 @@ type Account = {
   last_started_at: number | null;
 };
 
-type SortKey = "name-asc" | "name-desc" | "enabled" | "disabled";
+type Filter = "all" | "enabled" | "disabled";
 
 export function AccountsGrid({ accounts }: { accounts: Account[] }) {
   const [search, setSearch] = useState("");
-  const [sort, setSort] = useState<SortKey>("name-asc");
+  const [filter, setFilter] = useState<Filter>("all");
 
   const activeCount = accounts.filter((a) => a.enabled).length;
 
   const filtered = useMemo(() => {
-    let result = accounts.filter((a) =>
-      a.username.toLowerCase().includes(search.toLowerCase())
-    );
-    switch (sort) {
-      case "name-asc":  result = [...result].sort((a, b) => a.username.localeCompare(b.username)); break;
-      case "name-desc": result = [...result].sort((a, b) => b.username.localeCompare(a.username)); break;
-      case "enabled":   result = [...result].sort((a, b) => Number(b.enabled) - Number(a.enabled)); break;
-      case "disabled":  result = [...result].sort((a, b) => Number(a.enabled) - Number(b.enabled)); break;
-    }
-    return result;
-  }, [accounts, search, sort]);
+    return accounts
+      .filter((a) => a.username.toLowerCase().includes(search.toLowerCase()))
+      .filter((a) => {
+        if (filter === "enabled") return a.enabled;
+        if (filter === "disabled") return !a.enabled;
+        return true;
+      })
+      .sort((a, b) => a.username.localeCompare(b.username));
+  }, [accounts, search, filter]);
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap">
         <Input
           placeholder="Search accounts…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-xs"
         />
-        <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-          <SelectTrigger className="w-44">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="name-asc">Name A → Z</SelectItem>
-            <SelectItem value="name-desc">Name Z → A</SelectItem>
-            <SelectItem value="enabled">Enabled first</SelectItem>
-            <SelectItem value="disabled">Disabled first</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant={filter === "all" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setFilter("all")}
+          >
+            All
+          </Button>
+          <Button
+            type="button"
+            variant={filter === "enabled" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setFilter("enabled")}
+          >
+            Enabled
+          </Button>
+          <Button
+            type="button"
+            variant={filter === "disabled" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setFilter("disabled")}
+          >
+            Disabled
+          </Button>
+        </div>
         <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
           <Badge variant={activeCount > 0 ? "default" : "secondary"}>
             {activeCount} active
