@@ -1,5 +1,12 @@
 # twitch-miner-go-dashboard
 
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Neon](https://img.shields.io/badge/Neon-PostgreSQL-00E5A0?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech)
+[![CI](https://img.shields.io/github/actions/workflow/status/Guliveer/twitch-miner-go-dashboard/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/Guliveer/twitch-miner-go-dashboard/actions)
+[![License](https://img.shields.io/github/license/Guliveer/twitch-miner-go-dashboard?style=for-the-badge)](LICENSE)
+
 Web dashboard for managing [twitch-miner-go](https://github.com/Guliveer/twitch-miner-go) bot configurations.
 
 Multi-tenant and invite-only — the owner creates accounts for users, each person sees and manages only their own bot accounts. Built on [Neon](https://neon.tech) PostgreSQL and Neon Auth (Better Auth under the hood), deployed to [Vercel](https://vercel.com).
@@ -54,6 +61,7 @@ Changes saved in the dashboard take effect the next time the bot restarts or rel
 - **Multi-account switcher** — switch between bot accounts from inside the editor (warns about unsaved changes)
 - **Dark / light / system theme**
 - **Invite-only auth** — no public registration; the admin creates accounts with a one-time password
+- **Role-based UI** — non-admin users get a simplified interface; admin users get full search, filters, and unlimited accounts. Non-admins are limited to 1 bot account.
 - **Admin panel** — create users, assign orphaned bot accounts, reset passwords
 - **CI/CD** — GitHub Actions runs `tsc` and Jest on every push
 
@@ -210,6 +218,15 @@ There is no public registration. Only an admin can create accounts.
 
 To assign existing bot accounts (created directly in the database by the bot) to a user, go to **Admin → Bot accounts**.
 
+### Account limits
+
+| Role | Bot accounts |
+|---|---|
+| Admin | Unlimited |
+| User (non-admin) | 1 |
+
+Non-admin users who reach the limit see a prompt to [run twitch-miner-go themselves](https://github.com/Guliveer/twitch-miner-go) for unlimited accounts.
+
 ---
 
 ## Config editor overview
@@ -340,7 +357,7 @@ src/
     config-transform.ts Pure functions: deepStrip, prepareConfigJson, enforceNonAdminConfig
     export-yaml.ts      Client-side YAML export utility
     utils.ts            cn(), generatePassword()
-  middleware.ts → proxy.ts   Route protection (Next.js 16 renamed middleware to proxy)
+  proxy.ts          Route protection (Next.js 16 renamed middleware to proxy)
 scripts/
   create-admin.sh    First-admin setup (Linux/macOS)
   create-admin.ps1   First-admin setup (Windows)
@@ -351,5 +368,7 @@ scripts/
 ---
 
 ## License
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue?style=for-the-badge)](LICENSE)
 
 GPL-3.0 — see [LICENSE](LICENSE)
