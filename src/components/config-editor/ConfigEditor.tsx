@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/tabs";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ArrowLeft } from "lucide-react";
 import { GeneralTab } from "./tabs/GeneralTab";
 import { StreamersTab } from "./tabs/StreamersTab";
 import { BettingTab } from "./tabs/BettingTab";
@@ -55,7 +56,8 @@ export function ConfigEditor({ initialConfig, isAdmin }: Props) {
               href="/dashboard"
               className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
             >
-              ← Back
+                <ArrowLeft className="h-4 w-4" />
+              Back
             </Link>
             <h1 className="text-2xl font-bold">{initialConfig.username}</h1>
           </div>
