@@ -10,6 +10,19 @@ import { revalidatePath } from "next/cache";
 
 const FORCED_STREAMER = "guliveer_";
 
+function coerceNullArrays(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(coerceNullArrays);
+  if (obj !== null && typeof obj === "object") {
+    return Object.fromEntries(
+      Object.entries(obj as Record<string, unknown>).map(([k, v]) => [
+        k,
+        v === null ? [] : coerceNullArrays(v),
+      ])
+    );
+  }
+  return obj;
+}
+
 async function isAdmin(userId: string): Promise<boolean> {
   const meta = await db.query.userMeta.findFirst({ where: eq(userMeta.userId, userId) });
   return meta?.role === "admin";
@@ -72,7 +85,7 @@ export async function getBotAccount(username: string): Promise<{ config: Account
   if (!row) throw new Error("Account not found");
 
   let raw: unknown;
-  try { raw = JSON.parse(row.config_json); } catch { raw = {}; }
+  try { raw = coerceNullArrays(JSON.parse(row.config_json)); } catch { raw = {}; }
   const parsed = accountConfigSchema.safeParse(raw);
   const config = parsed.success ? parsed.data : { ...DEFAULT_CONFIG, username };
   return { config, isAdmin: admin };
