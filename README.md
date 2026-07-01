@@ -1,46 +1,126 @@
 # twitch-miner-go-dashboard
 
-Web dashboard for managing [twitch-miner-go](https://github.com/Guliveer/twitch-miner-go) bot configurations. Multi-tenant, invite-only — each user manages their own bot accounts without seeing others'.
+Web dashboard for managing [twitch-miner-go](https://github.com/Guliveer/twitch-miner-go) bot configurations.
 
-## Stack
+Multi-tenant and invite-only — the owner creates accounts for users, each person sees and manages only their own bot accounts. Built on [Neon](https://neon.tech) PostgreSQL and Neon Auth (Better Auth under the hood), deployed to [Vercel](https://vercel.com).
 
-- **Next.js 16** — App Router, Server Actions
-- **Neon Auth** (Better Auth) — invite-only session management
-- **Drizzle ORM** — schema & migrations on Neon PostgreSQL
-- **shadcn/ui** + **Tailwind CSS 4** — UI components
-- **Zod** — config schema validation
+---
+
+## Table of contents
+
+1. [How it works](#how-it-works)
+2. [Features](#features)
+3. [Tech stack](#tech-stack)
+4. [Prerequisites](#prerequisites)
+5. [Local setup](#local-setup)
+   - [1. Clone and install](#1-clone-and-install)
+   - [2. Create a Neon project](#2-create-a-neon-project)
+   - [3. Configure environment variables](#3-configure-environment-variables)
+   - [4. Run database migrations](#4-run-database-migrations)
+   - [5. Create the first admin account](#5-create-the-first-admin-account)
+   - [6. Start the dev server](#6-start-the-dev-server)
+6. [Deploying to Vercel](#deploying-to-vercel)
+7. [Adding users (invite flow)](#adding-users-invite-flow)
+8. [Config editor overview](#config-editor-overview)
+9. [YAML export](#yaml-export)
+10. [Admin panel](#admin-panel)
+11. [Database schema](#database-schema)
+12. [Testing](#testing)
+13. [Project structure](#project-structure)
+14. [License](#license)
+
+---
+
+## How it works
+
+The dashboard is a thin UI layer on top of the `accounts` table that `twitch-miner-go` already uses when running in database mode (`DB_ENABLED=true`). It does **not** replace the bot — it only edits the `config_json` column that the bot reads.
+
+```
+Browser → Dashboard (Next.js) → Neon PostgreSQL
+                                      ↑
+                              twitch-miner-go bot
+                              (reads same DB)
+```
+
+Changes saved in the dashboard take effect the next time the bot restarts or reloads its config (via PostgreSQL LISTEN/NOTIFY if the bot is configured for it).
+
+---
 
 ## Features
 
-- Full config editor for all `AccountConfig` fields (General, Streamers, Betting, Notifications, Watchers)
-- Per-streamer settings with Inherit / On / Off overrides
-- YAML export — download config ready to drop into `configs/<username>.yaml`
-- Dark / light / system theme
-- Admin panel — user management, account assignment, password reset
-- CI via GitHub Actions — type check + unit tests on every push
+- **Full config editor** — all `AccountConfig` fields across five tabs: General, Streamers, Betting, Notifications, Watchers
+- **Per-streamer overrides** — each streamer can inherit defaults or override individual settings (Inherit / On / Off)
+- **YAML export** — download a config file ready to drop into `configs/<username>.yaml`
+- **Multi-account switcher** — switch between bot accounts from inside the editor (warns about unsaved changes)
+- **Dark / light / system theme**
+- **Invite-only auth** — no public registration; the admin creates accounts with a one-time password
+- **Admin panel** — create users, assign orphaned bot accounts, reset passwords
+- **CI/CD** — GitHub Actions runs `tsc` and Jest on every push
 
-## Setup
+---
 
-### Prerequisites
+## Tech stack
 
-- Node.js ≥ 20
-- A [Neon](https://neon.tech) project with Auth provisioned
-- `psql` in PATH (for the first-admin script)
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, Server Actions) |
+| Auth | Neon Auth (`@neondatabase/auth`) — Better Auth under the hood |
+| Database | Neon PostgreSQL via `@neondatabase/serverless` |
+| ORM | Drizzle ORM + drizzle-kit |
+| UI | shadcn/ui + Tailwind CSS 4 + @base-ui/react |
+| Forms | React Hook Form + Zod |
+| Analytics | Vercel Analytics |
 
-### Install
+---
+
+## Prerequisites
+
+- **Node.js ≥ 20** — check with `node --version`
+- **A Neon account** — [console.neon.tech](https://console.neon.tech) — free tier is sufficient
+- **`psql` in PATH** — only needed for the first-admin setup script. Install via:
+  - macOS: `brew install libpq && brew link --force libpq`
+  - Ubuntu/Debian: `sudo apt install postgresql-client`
+  - Windows: install [PostgreSQL](https://www.postgresql.org/download/windows/) and add its `bin/` to PATH
+
+---
+
+## Local setup
+
+### 1. Clone and install
 
 ```bash
+git clone https://github.com/Guliveer/twitch-miner-go-dashboard.git
+cd twitch-miner-go-dashboard
 npm install
 ```
 
-### Environment
+### 2. Create a Neon project
 
-Copy `.env.example` to `.env` and fill in:
+1. Go to [console.neon.tech](https://console.neon.tech) and create a new project (or use an existing one that your bot already uses).
+2. In the project sidebar, open **Auth** and ensure it is provisioned. If not, click **Enable Auth**.
+3. Copy the **Base URL** from **Auth → Settings** — it looks like:
+   ```
+   https://<endpoint>.neonauth.<region>.aws.neon.tech/<dbname>/auth
+   ```
+4. Copy the **Connection string** from **Connection details** (use the pooled URL ending in `-pooler`).
 
+### 3. Configure environment variables
+
+```bash
+cp .env.example .env
 ```
-DB_DSN=postgresql://...
-NEON_AUTH_BASE_URL=https://<endpoint>.neonauth.<region>.aws.neon.tech/<dbname>/auth
-NEON_AUTH_COOKIE_SECRET=<64-char hex>
+
+Edit `.env` and fill in the three values:
+
+```env
+# Pooled connection string from Neon → Connection details
+DB_DSN=postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+# From Neon → Auth → Settings → Base URL
+NEON_AUTH_BASE_URL=https://ep-xxx.neonauth.region.aws.neon.tech/neondb/auth
+
+# Random 32-byte secret for signing session cookies
+NEON_AUTH_COOKIE_SECRET=<64-char hex string>
 ```
 
 Generate `NEON_AUTH_COOKIE_SECRET`:
@@ -49,17 +129,28 @@ Generate `NEON_AUTH_COOKIE_SECRET`:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-### Database
+> **Never commit `.env`** — it is git-ignored. Only `.env.example` is tracked.
 
-Run migrations:
+### 4. Run database migrations
+
+This creates the `user_meta` and `user_accounts` tables in your Neon database. The bot's existing `accounts` table is left untouched.
 
 ```bash
 npx drizzle-kit migrate
 ```
 
-### First admin account
+Expected output: `✓ migrations applied successfully!`
 
-With sign-up temporarily enabled in the Neon Auth console:
+### 5. Create the first admin account
+
+Sign-up is disabled by default. To bootstrap the first admin:
+
+**Step 1** — Temporarily enable sign-up in the Neon Auth console:
+- Go to **Neon console → Auth → Settings → Email & password**
+- Enable **Allow sign-up**
+- Save
+
+**Step 2** — Run the setup script:
 
 ```bash
 # Linux / macOS
@@ -69,13 +160,143 @@ bash scripts/create-admin.sh
 powershell -ExecutionPolicy Bypass -File scripts/create-admin.ps1
 ```
 
-The script registers the account and inserts the admin role. Disable sign-up again afterwards.
+The script will ask for your email, display name, and password. It then:
+1. Registers the account via Neon Auth
+2. Inserts a `user_meta` row with `role = 'admin'`
 
-### Dev server
+**Step 3** — Disable sign-up again in the Neon Auth console.
+
+> If you don't have `psql`, the script will fail at step 2. In that case, insert the row manually via the Neon console SQL editor:
+> ```sql
+> INSERT INTO user_meta (user_id, must_change_password, role)
+> VALUES ('<your-user-id>', false, 'admin');
+> ```
+> The user ID is printed by the script before it tries to run `psql`.
+
+### 6. Start the dev server
 
 ```bash
 npm run dev
 ```
+
+Open [http://localhost:3000](http://localhost:3000). You will be redirected to `/login`.
+
+---
+
+## Deploying to Vercel
+
+1. Push the repository to GitHub.
+2. Import the project at [vercel.com/new](https://vercel.com/new).
+3. Add the three environment variables from your `.env` under **Project Settings → Environment Variables**:
+   - `DB_DSN`
+   - `NEON_AUTH_BASE_URL`
+   - `NEON_AUTH_COOKIE_SECRET`
+4. Deploy.
+5. **Add the production URL as a trusted origin in Neon Auth:**
+   - Go to **Neon console → Auth → Settings → Trusted origins**
+   - Add `https://<your-app>.vercel.app`
+   - Without this step, Neon Auth will reject all requests from the production domain with `Invalid origin`.
+
+---
+
+## Adding users (invite flow)
+
+There is no public registration. Only an admin can create accounts.
+
+1. Log in as admin and go to **Admin → Users → New user**.
+2. Enter the user's email and display name.
+3. A one-time temporary password is generated and shown **once** — share it with the user.
+4. On first login, the user is forced to change their password before accessing the dashboard.
+
+To assign existing bot accounts (created directly in the database by the bot) to a user, go to **Admin → Bot accounts**.
+
+---
+
+## Config editor overview
+
+The editor has five tabs that map directly to the bot's `AccountConfig` struct:
+
+| Tab | Fields |
+|---|---|
+| **General** | `enabled`, `max_watch_streams`, `priority`, `proxy`, `features`, `followers` |
+| **Streamers** | `streamer_defaults` (global), `streamers[]` with per-streamer overrides |
+| **Betting** | `streamer_defaults.make_predictions`, `streamer_defaults.bet` |
+| **Notifications** | `notifications.*` — Telegram, Discord, Webhook, Matrix, Pushover, Gotify *(admin only)* |
+| **Watchers** | `category_watcher`, `team_watcher` |
+
+**Per-streamer overrides** work in three states:
+- **Inherit** — field is omitted from the config; the bot uses the value from `streamer_defaults`
+- **On** — explicitly `true`, overrides the default
+- **Off** — explicitly `false`, overrides the default
+
+**Notifications tab** is only visible to the admin. Non-admin users cannot configure notifications — any notification data they submit is silently stripped server-side.
+
+The bot account `guliveer_` is automatically added to every non-admin user's streamer list and cannot be removed by them.
+
+---
+
+## YAML export
+
+The **Download YAML** button exports the current form state (including unsaved changes) as a `.yaml` file compatible with the bot's `configs/<username>.yaml` format.
+
+The export:
+- Strips empty strings and empty arrays (equivalent to Go's `omitempty`)
+- Excludes `auth_token` and `password` (those are `json:"-"` in the bot and must be set via env vars)
+- Sets the filename to `<username>.yaml`
+
+To use the file: copy it to the bot's `configs/` directory and restart the bot. The bot will load it from the filesystem on startup (or from the DB if `DB_ENABLED=true` — in that case the dashboard already wrote the config to the DB and no file is needed).
+
+---
+
+## Admin panel
+
+Accessible at `/admin` (admin role required).
+
+### Users (`/admin/users`)
+
+| Action | How |
+|---|---|
+| Create user | "New user" — enter email + name, receive one-time password |
+| Reset password | "Reset password" per row — generates a new one-time password, sets `must_change_password = true` |
+
+### Bot accounts (`/admin/accounts`)
+
+Lists bot accounts that exist in the `accounts` table but are not yet claimed by any dashboard user. This happens when the bot creates accounts directly in the database.
+
+Use the dropdown to assign an unclaimed account to a user.
+
+---
+
+## Database schema
+
+The dashboard adds two tables to your Neon database. The bot's existing tables are never modified.
+
+```
+accounts          ← bot-owned, read/written by both bot and dashboard
+user_meta         ← dashboard-owned
+user_accounts     ← dashboard-owned (ownership junction)
+neon_auth.*       ← managed by Neon Auth automatically
+goose_db_version  ← bot migration tracking, do not touch
+```
+
+### `user_meta`
+
+| Column | Type | Description |
+|---|---|---|
+| `user_id` | `text` PK | Neon Auth user ID |
+| `must_change_password` | `boolean` | `true` on first login; cleared after user sets a new password |
+| `role` | `user_role` enum | `'user'` or `'admin'` |
+
+### `user_accounts`
+
+| Column | Type | Description |
+|---|---|---|
+| `user_id` | `text` | Dashboard user ID |
+| `bot_username` | `text` | Bot account username (FK → `accounts.username`) |
+
+Primary key is `(user_id, bot_username)`.
+
+---
 
 ## Testing
 
@@ -83,17 +304,51 @@ npm run dev
 npm test
 ```
 
-Tests cover `deepStrip`, `coerceNullToUndefined`, `enforceNonAdminConfig`, `prepareConfigJson`, and the Zod config schema. The CI pipeline runs them on every push and after merging to `main`.
+47 unit tests across two suites:
 
-## Database schema
+| Suite | What it covers |
+|---|---|
+| `config-transform.test.ts` | `deepStrip`, `coerceNullToUndefined`, `enforceNonAdminConfig`, `prepareConfigJson` — all config serialisation logic that protects against malformed JSON reaching the bot |
+| `config-schema.test.ts` | Zod schema parsing, null-to-empty-array coercion, enum validation, duration string format |
 
-| Table | Owner | Purpose |
-|---|---|---|
-| `accounts` | bot | Bot account configs — **do not modify directly** |
-| `user_meta` | dashboard | Dashboard user roles and flags |
-| `user_accounts` | dashboard | Ownership: which user manages which bot account |
-| `neon_auth.*` | Neon Auth | Sessions, users — managed automatically |
-| `goose_db_version` | bot | Bot migration tracking — do not touch |
+The GitHub Actions CI pipeline (`.github/workflows/ci.yml`) runs `tsc --noEmit` and `npm test` on every push to any branch and on every pull request targeting `main`.
+
+---
+
+## Project structure
+
+```
+src/
+  actions/          Server Actions (auth.ts, accounts.ts, admin.ts)
+  app/
+    (auth)/         Login and change-password pages
+    (app)/          Dashboard and config editor (requires auth)
+    admin/          Admin panel (requires admin role)
+    api/auth/       Neon Auth catch-all route handler
+  components/
+    config-editor/  Five-tab config editor and shared form components
+    dashboard/      Account cards, modals, grid
+    admin/          Users table, claim form, create user form
+    settings/       Profile and password change form
+    ui/             shadcn/ui primitives
+  db/
+    schema.ts       Drizzle table definitions (user_meta, user_accounts)
+    migrations/     Auto-generated SQL migration files
+  lib/
+    auth.ts             Neon Auth instance and session helper
+    config-schema.ts    Zod schema mirroring Go AccountConfig
+    config-transform.ts Pure functions: deepStrip, prepareConfigJson, enforceNonAdminConfig
+    export-yaml.ts      Client-side YAML export utility
+    utils.ts            cn(), generatePassword()
+  middleware.ts → proxy.ts   Route protection (Next.js 16 renamed middleware to proxy)
+scripts/
+  create-admin.sh    First-admin setup (Linux/macOS)
+  create-admin.ps1   First-admin setup (Windows)
+.github/workflows/
+  ci.yml             Type check + tests on every push
+```
+
+---
 
 ## License
 
