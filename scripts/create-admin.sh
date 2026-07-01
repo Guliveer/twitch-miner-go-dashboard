@@ -1,19 +1,21 @@
 #!/usr/bin/env bash
 # Creates the first admin account for the dashboard.
 # Usage: ./scripts/create-admin.sh
-# Requires: curl, psql (or uses DB_DSN from .env)
+# Requires: curl, psql
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
-# Load .env
+# Parse .env safely — avoids issues with & and special chars in values
 if [[ -f "$ROOT_DIR/.env" ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source "$ROOT_DIR/.env"
-  set +a
+  while IFS= read -r line; do
+    [[ -z "$line" || "$line" == \#* ]] && continue
+    key="${line%%=*}"
+    value="${line#*=}"
+    export "$key=$value"
+  done < "$ROOT_DIR/.env"
 fi
 
 : "${NEON_AUTH_BASE_URL:?Missing NEON_AUTH_BASE_URL in .env}"
@@ -24,23 +26,26 @@ echo "=== Twitch Miner Dashboard — First Admin Setup ==="
 echo ""
 
 read -rp "Email: " EMAIL
+read -rp "Display name: " NAME
 read -rsp "Password (min 8 chars): " PASSWORD
 echo ""
-read -rp "Display name: " NAME
 echo ""
 
 # 1. Register via Neon Auth
 echo "Creating auth account..."
-RESPONSE=$(curl -sf -X POST "${NEON_AUTH_BASE_URL}/sign-up/email" \
+RESPONSE=$(curl -sf \
+  -X POST "${NEON_AUTH_BASE_URL}/sign-up/email" \
   -H "Content-Type: application/json" \
+  -H "Origin: http://localhost:3000" \
   -d "{\"email\":\"$EMAIL\",\"password\":\"$PASSWORD\",\"name\":\"$NAME\"}")
+
+echo "Response: $RESPONSE"
 
 USER_ID=$(echo "$RESPONSE" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
 
 if [[ -z "$USER_ID" ]]; then
   echo ""
-  echo "Error: Failed to create auth account. Response:"
-  echo "$RESPONSE"
+  echo "Error: Could not extract user ID from response."
   exit 1
 fi
 
@@ -58,3 +63,4 @@ echo "Done! You can now log in at /login with:"
 echo "  Email:    $EMAIL"
 echo "  Password: (the one you just set)"
 echo ""
+echo "Remember to disable sign-up in Neon Auth console after this."
