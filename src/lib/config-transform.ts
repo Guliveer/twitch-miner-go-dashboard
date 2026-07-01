@@ -18,7 +18,12 @@ export function coerceNullToUndefined(obj: unknown): unknown {
 export function enforceNonAdminConfig(config: AccountConfigForm): AccountConfigForm {
   const withoutForced = config.streamers.filter((s) => s.username !== FORCED_STREAMER);
   const streamers = [{ username: FORCED_STREAMER }, ...withoutForced];
-  return { ...config, streamers, notifications: {} };
+  return {
+    ...config,
+    streamers,
+    notifications: {},
+    features: { ...config.features, enable_analytics: false },
+  };
 }
 
 export function deepStrip(value: unknown): unknown {

@@ -23,7 +23,7 @@ const PRIORITIES = [
   "POINTS_DESCENDING",
 ];
 
-export function GeneralTab() {
+export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
   const {
     register,
     watch,
@@ -76,12 +76,16 @@ export function GeneralTab() {
           />
           <Label>Claim drops on startup</Label>
         </div>
-        <div className="flex items-center gap-3">
+        <div className={`flex items-center gap-3 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
           <Switch
             checked={watch("features.enable_analytics")}
             onCheckedChange={(v) => setValue("features.enable_analytics", v)}
+            disabled={!isAdmin}
           />
-          <Label>Enable analytics</Label>
+          <Label>
+            Enable analytics
+            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(admin only)</span>}
+          </Label>
         </div>
       </div>
 

@@ -174,7 +174,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               Watchers
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="general"><GeneralTab /></TabsContent>
+          <TabsContent value="general"><GeneralTab isAdmin={isAdmin} /></TabsContent>
           <TabsContent value="streamers"><StreamersTab isAdmin={isAdmin} /></TabsContent>
           <TabsContent value="betting"><BettingTab /></TabsContent>
           {isAdmin && (
