@@ -123,7 +123,7 @@ export async function toggleEnabled(username: string, enabled: boolean) {
   const now = Math.floor(Date.now() / 1000);
 
   await db.execute(
-    sql`UPDATE accounts SET enabled = ${enabled}, config_json = (config_json::jsonb || jsonb_build_object('enabled', ${enabled}))::text, updated_at = ${now} WHERE username = ${username}`,
+    sql`UPDATE accounts SET enabled = ${enabled}, updated_at = ${now} WHERE username = ${username}`,
   );
 
   revalidatePath("/dashboard");
