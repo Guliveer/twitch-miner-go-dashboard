@@ -36,19 +36,21 @@ export async function changePassword(newPassword: string) {
   redirect("/dashboard");
 }
 
-export async function changePasswordWithVerification(currentPassword: string, newPassword: string) {
+export async function resetPassword(newPassword: string) {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
-
-  // Verify current password by attempting sign-in
-  const verify = await auth.signIn.email({
-    email: session.user.email,
-    password: currentPassword,
-  });
-  if (verify.error) throw new Error("Current password is incorrect");
-
+  
+  // Reset password directly without sending email
   const result = await auth.admin.setUserPassword({
     userId: session.user.id,
+    newPassword,
+  });
+  if (result.error) throw new Error(result.error.message);
+}
+
+export async function changePasswordWithVerification(currentPassword: string, newPassword: string) {
+  const result = await auth.changePassword({
+    currentPassword,
     newPassword,
   });
   if (result.error) throw new Error(result.error.message);

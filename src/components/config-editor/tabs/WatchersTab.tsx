@@ -50,8 +50,9 @@ export function WatchersTab() {
               onCheckedChange={(v) =>
                 setValue("category_watcher.drops_only", v)
               }
+              disabled={true}
             />
-            <Label>Drops only</Label>
+            <Label className="text-xs text-muted-foreground">Drops only (non-editable)</Label>
           </div>
         </div>
 
