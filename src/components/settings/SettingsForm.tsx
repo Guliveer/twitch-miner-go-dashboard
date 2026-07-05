@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,7 +36,7 @@ function formatDate(epochSec: number): string {
 const nameSchema = z.object({ name: z.string().min(1, "Name is required") });
 const passwordSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required"),
+    currentPassword: z.string().min(1, "Required"),
     newPassword: z.string().min(8, "Minimum 8 characters"),
     confirmPassword: z.string(),
   })

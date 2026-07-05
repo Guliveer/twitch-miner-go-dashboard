@@ -48,31 +48,31 @@ const durationString = z
 const filterConditionSchema = z.object({
   by: z.enum(OUTCOME_KEYS),
   where: z.enum(CONDITIONS),
-  value: z.number().default(0),
+  value: z.number(),
 });
 
 const betSettingsSchema = z.object({
   strategy: z.enum(STRATEGIES).optional(),
-  percentage: z.number().int().nullable().optional(),
-  percentage_gap: z.number().int().nullable().optional(),
-  max_points: z.number().int().nullable().optional(),
-  minimum_points: z.number().int().nullable().optional(),
-  stealth_mode: z.boolean().nullable().optional(),
-  delay: z.number().nullable().optional(),
+  percentage: z.number().int().optional(),
+  percentage_gap: z.number().int().optional(),
+  max_points: z.number().int().optional(),
+  minimum_points: z.number().int().optional(),
+  stealth_mode: z.boolean().optional(),
+  delay: z.number().optional(),
   delay_mode: z.enum(DELAY_MODES).optional(),
-  filter_condition: filterConditionSchema.nullable().optional(),
+  filter_condition: filterConditionSchema.optional(),
 });
 
 const streamerSettingsSchema = z.object({
-  make_predictions: z.boolean().nullable().optional(),
-  follow_raid: z.boolean().nullable().optional(),
-  claim_drops: z.boolean().nullable().optional(),
-  claim_moments: z.boolean().nullable().optional(),
-  watch_streak: z.boolean().nullable().optional(),
-  community_goals: z.boolean().nullable().optional(),
-  drops_only: z.boolean().nullable().optional(),
+  make_predictions: z.boolean().optional(),
+  follow_raid: z.boolean().optional(),
+  claim_drops: z.boolean().optional(),
+  claim_moments: z.boolean().optional(),
+  watch_streak: z.boolean().optional(),
+  community_goals: z.boolean().optional(),
+  drops_only: z.boolean().optional(),
   chat: z.enum(CHAT_MODES).optional(),
-  bet: betSettingsSchema.nullable().optional(),
+  bet: betSettingsSchema.optional(),
 });
 
 const streamerConfigSchema = z.object({
@@ -82,11 +82,11 @@ const streamerConfigSchema = z.object({
 
 const categoryConfigSchema = z.object({
   slug: z.string().min(1),
-  drops_only: z.boolean().nullable().optional(),
+  drops_only: z.boolean().optional(),
 });
 
 const batchConfigSchema = z.object({
-  enabled: z.boolean().nullable().optional(),
+  enabled: z.boolean().optional(),
   interval: durationString.optional(),
   max_entries: z.number().int().optional(),
   immediate_events: z.array(z.enum(ALL_EVENTS)).optional(),
@@ -142,25 +142,25 @@ const gotifySchema = z.object({
 });
 
 const notificationsSchema = z.object({
-  batch: batchConfigSchema.nullable().optional(),
-  telegram: telegramSchema.nullable().optional(),
-  discord: discordSchema.nullable().optional(),
-  webhook: webhookSchema.nullable().optional(),
-  matrix: matrixSchema.nullable().optional(),
-  pushover: pushoverSchema.nullable().optional(),
-  gotify: gotifySchema.nullable().optional(),
+  batch: batchConfigSchema.optional(),
+  telegram: telegramSchema.optional(),
+  discord: discordSchema.optional(),
+  webhook: webhookSchema.optional(),
+  matrix: matrixSchema.optional(),
+  pushover: pushoverSchema.optional(),
+  gotify: gotifySchema.optional(),
 });
 
 export const accountConfigSchema = z.object({
   username: z.string().min(1),
-  enabled: z.boolean().nullable().optional(),
+  enabled: z.boolean().optional(),
   features: z.object({
     claim_drops_startup: z.boolean(),
     enable_analytics: z.boolean(),
   }),
   max_watch_streams: z.number().int().min(1).optional(),
   priority: z.array(z.enum(PRIORITIES)),
-  proxy: z.string().regex(/^https?:\/\/|^socks5:\/\//).optional(),
+  proxy: z.string().optional(),
   category_watcher: z.object({
     enabled: z.boolean(),
     poll_interval: durationString.optional(),
