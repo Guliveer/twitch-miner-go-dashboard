@@ -19,6 +19,7 @@ import {
 
 const schema = z
   .object({
+    currentPassword: z.string().min(1, "Current password is required"),
     password: z.string().min(8, "Minimum 8 characters"),
     confirm: z.string(),
   })
@@ -42,7 +43,7 @@ export default function ChangePasswordPage() {
   const onSubmit = async (data: Fields) => {
     setError("");
     try {
-      await changePassword(data.password);
+      await changePassword(data.currentPassword, data.password);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to change password");
     }
@@ -54,11 +55,20 @@ export default function ChangePasswordPage() {
         <CardHeader>
           <CardTitle>Set your password</CardTitle>
           <CardDescription>
-            You must change your temporary password before continuing.
+            Enter your temporary password and choose a new one.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="currentPassword">Current (temporary) password</Label>
+              <Input id="currentPassword" type="password" {...register("currentPassword")} />
+              {errors.currentPassword && (
+                <p className="text-sm text-destructive">
+                  {errors.currentPassword.message}
+                </p>
+              )}
+            </div>
             <div className="space-y-1">
               <Label htmlFor="password">New password</Label>
               <Input id="password" type="password" {...register("password")} />
@@ -69,7 +79,7 @@ export default function ChangePasswordPage() {
               )}
             </div>
             <div className="space-y-1">
-              <Label htmlFor="confirm">Confirm password</Label>
+              <Label htmlFor="confirm">Confirm new password</Label>
               <Input id="confirm" type="password" {...register("confirm")} />
               {errors.confirm && (
                 <p className="text-sm text-destructive">

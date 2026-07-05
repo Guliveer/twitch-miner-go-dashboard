@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { accountConfigSchema, DEFAULT_CONFIG, type AccountConfigForm } from "@/lib/config-schema";
 import {
   coerceNullToUndefined,
+  deepMergeDefaults,
   enforceNonAdminConfig,
   prepareConfigJson,
 } from "@/lib/config-transform";
@@ -57,8 +58,8 @@ export async function getBotAccount(username: string): Promise<{ config: Account
 
   let raw: Record<string, unknown> = {};
   try { raw = coerceNullToUndefined(JSON.parse(row.config_json)) as Record<string, unknown>; } catch { /* ignore */ }
-  // Merge with defaults so new/missing fields always have a value for the form
-  const config = { ...DEFAULT_CONFIG, ...raw, username } as AccountConfigForm;
+  // Deep merge with defaults so new/missing nested fields (e.g. filter_condition in bet) always have a value
+  const config = deepMergeDefaults(DEFAULT_CONFIG, { ...raw, username });
   return { config, isAdmin: admin };
 }
 

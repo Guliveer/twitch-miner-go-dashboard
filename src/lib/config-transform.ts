@@ -43,6 +43,38 @@ export function deepStrip(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Deep merge: fills in missing nested fields from `defaults` into `source`,
+ * but never overwrites an existing value with a default. Arrays are replaced,
+ * not merged.
+ */
+export function deepMergeDefaults<T extends Record<string, unknown>>(
+  defaults: T,
+  source: Record<string, unknown>,
+): T {
+  const result = { ...defaults } as Record<string, unknown>;
+
+  for (const key of Object.keys(source)) {
+    const sv = source[key];
+    if (sv === undefined) continue;
+
+    const dv = result[key];
+    if (
+      typeof dv === "object" && dv !== null && !Array.isArray(dv) &&
+      typeof sv === "object" && sv !== null && !Array.isArray(sv)
+    ) {
+      result[key] = deepMergeDefaults(
+        dv as Record<string, unknown>,
+        sv as Record<string, unknown>,
+      );
+    } else {
+      result[key] = sv;
+    }
+  }
+
+  return result as T;
+}
+
 export function prepareConfigJson(config: AccountConfigForm): string {
   const stripped = deepStrip(config) as Record<string, unknown>;
 

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TagInput } from "../shared/TagInput";
+import { numRegister } from "../shared/form-helpers";
 
 const PRIORITIES = [
   "STREAK",
@@ -46,7 +47,7 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
           <Input
             type="number"
             min={1}
-            {...register("max_watch_streams", { valueAsNumber: true })}
+            {...register("max_watch_streams", numRegister())}
           />
         </div>
         <div className="space-y-1">

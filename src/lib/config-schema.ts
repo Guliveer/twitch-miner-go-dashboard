@@ -212,6 +212,7 @@ export const DEFAULT_CONFIG: AccountConfigForm = {
       stealth_mode: false,
       delay: 6,
       delay_mode: "FROM_END",
+      filter_condition: { by: "total_users", where: "GTE", value: 0 },
     },
   },
   streamers: [],

@@ -7,6 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { DurationInput } from "../shared/DurationInput";
 import { X } from "lucide-react";
 
@@ -44,14 +51,21 @@ export function WatchersTab() {
               className="max-w-xs"
             />
           </div>
-          <div className="flex items-center gap-3 pt-6">
-            <Switch
-              checked={watch("category_watcher.drops_only") ?? false}
-              onCheckedChange={(v) =>
-                setValue("category_watcher.drops_only", v)
-              }
-            />
-            <Label>Drops only</Label>
+          <div className="space-y-1 pt-6">
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={watch("category_watcher.drops_only") ?? false}
+                onCheckedChange={(v) =>
+                  setValue("category_watcher.drops_only", v)
+                }
+              />
+              <Label>Drops only</Label>
+            </div>
+            <p className="text-xs text-muted-foreground max-w-sm">
+              Only discover streams that have active Twitch Drops campaigns.
+              Discovered streamers will also be set to drops-only mode. Each
+              category can override this below.
+            </p>
           </div>
         </div>
 
@@ -64,20 +78,38 @@ export function WatchersTab() {
                 placeholder="just-chatting"
                 className="max-w-xs"
               />
-              <div className="flex items-center gap-2 min-w-fit">
-                <Switch
-                  checked={
-                    watch(`category_watcher.categories.${i}.drops_only`) ??
-                    false
+              <div className="min-w-fit">
+                <Select
+                  value={
+                    watch(`category_watcher.categories.${i}.drops_only`) ===
+                    undefined
+                      ? ""
+                      : String(
+                          watch(
+                            `category_watcher.categories.${i}.drops_only`,
+                          ),
+                        )
                   }
-                  onCheckedChange={(v) =>
+                  onValueChange={(v) =>
                     setValue(
                       `category_watcher.categories.${i}.drops_only`,
-                      v,
+                      v === "" ? undefined : v === "true",
                     )
                   }
-                />
-                <Label className="text-xs whitespace-nowrap">drops only</Label>
+                >
+                  <SelectTrigger className="h-8 text-xs w-[130px]">
+                    <SelectValue placeholder="Inherit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      <span className="text-muted-foreground italic">
+                        Inherit
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="true">✓ On</SelectItem>
+                    <SelectItem value="false">✗ Off</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <Button
                 type="button"

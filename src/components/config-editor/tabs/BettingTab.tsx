@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { numRegister } from "../shared/form-helpers";
 
 const STRATEGIES = [
   "SMART",
@@ -110,18 +111,14 @@ export function BettingTab() {
             <Label>Percentage</Label>
             <Input
               type="number"
-              {...register("streamer_defaults.bet.percentage", {
-                valueAsNumber: true,
-              })}
+              {...register("streamer_defaults.bet.percentage", numRegister())}
             />
           </div>
           <div className="space-y-1">
             <Label>Percentage gap</Label>
             <Input
               type="number"
-              {...register("streamer_defaults.bet.percentage_gap", {
-                valueAsNumber: true,
-              })}
+              {...register("streamer_defaults.bet.percentage_gap", numRegister())}
             />
           </div>
           <div className="space-y-1">
@@ -129,27 +126,21 @@ export function BettingTab() {
             <Input
               type="number"
               step="0.1"
-              {...register("streamer_defaults.bet.delay", {
-                valueAsNumber: true,
-              })}
+              {...register("streamer_defaults.bet.delay", numRegister())}
             />
           </div>
           <div className="space-y-1">
             <Label>Max points</Label>
             <Input
               type="number"
-              {...register("streamer_defaults.bet.max_points", {
-                valueAsNumber: true,
-              })}
+              {...register("streamer_defaults.bet.max_points", numRegister())}
             />
           </div>
           <div className="space-y-1">
             <Label>Minimum points</Label>
             <Input
               type="number"
-              {...register("streamer_defaults.bet.minimum_points", {
-                valueAsNumber: true,
-              })}
+              {...register("streamer_defaults.bet.minimum_points", numRegister())}
             />
           </div>
         </div>
@@ -223,9 +214,7 @@ export function BettingTab() {
               <Input
                 type="number"
                 step="any"
-                {...register("streamer_defaults.bet.filter_condition.value", {
-                  valueAsNumber: true,
-                })}
+                {...register("streamer_defaults.bet.filter_condition.value", numRegister(0))}
               />
             </div>
           </div>

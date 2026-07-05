@@ -65,11 +65,16 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
   const handleSaveConfirmed = () => {
     setSaveDialogOpen(false);
     methods.handleSubmit((data) => {
+      const cleaned = {
+        ...data,
+        streamers: data.streamers.filter((s) => s.username.trim().length > 0),
+      };
+      const removedCount = data.streamers.length - cleaned.streamers.length;
       startTransition(async () => {
         try {
-          await updateBotAccount(data.username, data);
-          toast.success("Configuration saved");
-          methods.reset(data);
+          await updateBotAccount(cleaned.username, cleaned);
+          toast.success("Configuration saved" + (removedCount > 0 ? ` (removed ${removedCount} unnamed streamer${removedCount > 1 ? "s" : ""})"` : ""));
+          methods.reset(cleaned);
         } catch (e) {
           toast.error(e instanceof Error ? e.message : "Save failed");
         }
