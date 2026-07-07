@@ -30,7 +30,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   ArrowLeft, SlidersHorizontal, Users, TrendingUp,
-  Bell, Eye, Download, Save,
+  Bell, Eye, Download, KeyRound, Save,
 } from "lucide-react";
 import { GeneralTab } from "./tabs/GeneralTab";
 import { StreamersTab } from "./tabs/StreamersTab";
@@ -40,6 +40,8 @@ import { WatchersTab } from "./tabs/WatchersTab";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { exportConfigAsYaml } from "@/lib/export-yaml";
+import { useDeviceCode } from "@/hooks/useDeviceCode";
+import { DeviceCodeModal } from "@/components/device-code-modal";
 
 type Props = {
   initialConfig: AccountConfigForm;
@@ -55,6 +57,9 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
 
   const [isPending, startTransition] = useTransition();
   const isDirty = methods.formState.isDirty;
+
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const pendingCode = useDeviceCode(initialConfig.username);
 
   // Save confirmation dialog
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
@@ -136,6 +141,16 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
           </div>
 
           <div className="flex gap-2 shrink-0">
+            {pendingCode && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setAuthModalOpen(true)}
+              >
+                <KeyRound className="h-4 w-4" />
+                Authorize
+              </Button>
+            )}
             <Button
               type="button"
               variant="outline"
@@ -235,6 +250,16 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Device code authorization modal */}
+      {pendingCode && (
+        <DeviceCodeModal
+          username={initialConfig.username}
+          code={pendingCode}
+          open={authModalOpen}
+          onOpenChange={setAuthModalOpen}
+        />
+      )}
     </FormProvider>
   );
 }

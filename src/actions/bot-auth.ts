@@ -13,20 +13,18 @@ type AuthStatusResponse = {
  */
 export async function checkBotAuthStatus(username: string): Promise<AuthStatusResponse | null> {
   const baseUrl = process.env.BOT_URL;
-  const botUser = process.env.BOT_USERNAME;
-  const botPass = process.env.BOT_PASSWORD;
+  const apiKey = process.env.BOT_API_KEY;
 
-  if (!baseUrl || !botUser || !botPass) {
-    console.warn("Bot API credentials not configured – BOT_URL, BOT_USERNAME, BOT_PASSWORD");
+  if (!baseUrl || !apiKey) {
+    console.warn("Bot API key not configured – BOT_URL, BOT_API_KEY");
     return null;
   }
 
   try {
     const url = `${baseUrl.replace(/\/$/, "")}/api/auth-status/${encodeURIComponent(username)}`;
-    const basicAuth = btoa(`${botUser}:${botPass}`);
 
     const res = await fetch(url, {
-      headers: { Authorization: `Basic ${basicAuth}` },
+      headers: { "X-API-Key": apiKey },
       cache: "no-store",
     });
 

@@ -4,11 +4,13 @@ import { useState, useTransition } from "react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { toggleEnabled } from "@/actions/accounts";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Settings2 } from "lucide-react";
+import { KeyRound, Settings2 } from "lucide-react";
+import { useDeviceCode } from "@/hooks/useDeviceCode";
+import { DeviceCodeModal } from "@/components/device-code-modal";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
 
 type Props = {
@@ -36,6 +38,8 @@ function statusBadge(enabled: boolean, lastStartedAt: number | null) {
 export function AccountCard({ username, enabled, lastStartedAt }: Props) {
   const [isPending, startTransition] = useTransition();
   const [optimisticEnabled, setOptimisticEnabled] = useState(enabled);
+  const [modalOpen, setModalOpen] = useState(false);
+  const pendingCode = useDeviceCode(username);
 
   const handleToggle = (value: boolean) => {
     setOptimisticEnabled(value);
@@ -68,15 +72,37 @@ export function AccountCard({ username, enabled, lastStartedAt }: Props) {
         </div>
       </CardContent>
       <CardFooter className="flex justify-between gap-2">
-        <Link
-          href={`/dashboard/${username}`}
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-        >
-          <Settings2 className="h-4 w-4" />
-          Configure
-        </Link>
+        <div className="flex gap-2">
+          {pendingCode && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setModalOpen(true)}
+            >
+              <KeyRound className="h-4 w-4" />
+              Authorize
+            </Button>
+          )}
+          <Link
+            href={`/dashboard/${username}`}
+            className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+          >
+            <Settings2 className="h-4 w-4" />
+            Configure
+          </Link>
+        </div>
         <DeleteAccountDialog username={username} />
       </CardFooter>
+
+      {pendingCode && (
+        <DeviceCodeModal
+          username={username}
+          code={pendingCode}
+          open={modalOpen}
+          onOpenChange={setModalOpen}
+        />
+      )}
     </Card>
   );
 }

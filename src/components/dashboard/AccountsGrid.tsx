@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { AccountCard } from "./AccountCard";
-import { AuthDeviceCodePopup } from "@/components/auth-device-code-popup";
 import { SearchX } from "lucide-react";
 
 type Account = {
@@ -84,13 +83,12 @@ export function AccountsGrid({ accounts, compact = false }: { accounts: Account[
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((a) => (
-            <div key={a.username} className="space-y-2">
+            <div key={a.username}>
               <AccountCard
                 username={a.username}
                 enabled={a.enabled}
                 lastStartedAt={a.last_started_at}
               />
-              <AuthDeviceCodePopup username={a.username} />
             </div>
           ))}
         </div>

@@ -169,11 +169,27 @@ describe("enforceNonAdminConfig", () => {
     expect(result.notifications).toEqual({});
   });
 
+  it("clamps max_watch_streams to 10 when exceeded", () => {
+    const config: AccountConfigForm = { ...baseConfig, max_watch_streams: 50 };
+    const result = enforceNonAdminConfig(config);
+    expect(result.max_watch_streams).toBe(10);
+  });
+
+  it("preserves max_watch_streams when within limit", () => {
+    const result = enforceNonAdminConfig(baseConfig);
+    expect(result.max_watch_streams).toBe(baseConfig.max_watch_streams);
+  });
+
+  it("strips proxy", () => {
+    const config: AccountConfigForm = { ...baseConfig, proxy: "socks5://127.0.0.1:1080" };
+    const result = enforceNonAdminConfig(config);
+    expect(result.proxy).toBeUndefined();
+  });
+
   it("preserves other fields unchanged", () => {
     const result = enforceNonAdminConfig(baseConfig);
     expect(result.username).toBe("testuser");
     expect(result.followers).toEqual(baseConfig.followers);
-    expect(result.max_watch_streams).toBe(baseConfig.max_watch_streams);
   });
 });
 

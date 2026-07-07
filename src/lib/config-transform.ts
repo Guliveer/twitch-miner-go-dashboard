@@ -23,6 +23,10 @@ export function enforceNonAdminConfig(config: AccountConfigForm): AccountConfigF
     streamers,
     notifications: {},
     features: { ...config.features, enable_analytics: false },
+    max_watch_streams: config.max_watch_streams != null
+      ? Math.min(config.max_watch_streams, 10)
+      : config.max_watch_streams,
+    proxy: undefined,
   };
 }
 

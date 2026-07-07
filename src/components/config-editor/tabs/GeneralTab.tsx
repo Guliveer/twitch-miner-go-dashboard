@@ -43,16 +43,25 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1">
-          <Label>Max watch streams</Label>
+          <Label>
+            Max watch streams
+            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(max 10)</span>}
+          </Label>
           <Input
             type="number"
             min={1}
+            max={10}
             {...register("max_watch_streams", numRegister())}
           />
         </div>
-        <div className="space-y-1">
+        <div className={`space-y-1 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
           <Label>Proxy (optional)</Label>
-          <Input placeholder="socks5://127.0.0.1:1080" {...register("proxy")} />
+          <Input
+            placeholder="socks5://127.0.0.1:1080"
+            disabled={!isAdmin}
+            {...register("proxy")}
+          />
+          {!isAdmin && <p className="text-xs text-muted-foreground">(admin only)</p>}
         </div>
       </div>
 
