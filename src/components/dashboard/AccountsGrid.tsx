@@ -33,57 +33,45 @@ export function AccountsGrid({ accounts, compact = false }: { accounts: Account[
   }, [accounts, search, filter]);
 
   return (
-    <div className="space-y-4">
-      {!compact && <div className="flex items-center gap-2 flex-wrap">
+    <div className="space-y-6">
+      {!compact && <div className="flex items-center gap-3 flex-wrap">
         <Input
           placeholder="Search accounts…"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="max-w-xs"
+          className="max-w-64"
         />
         <div className="flex items-center gap-1">
-          <Button
-            type="button"
-            variant={filter === "all" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setFilter("all")}
-          >
-            All
-          </Button>
-          <Button
-            type="button"
-            variant={filter === "enabled" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setFilter("enabled")}
-          >
-            Enabled
-          </Button>
-          <Button
-            type="button"
-            variant={filter === "disabled" ? "secondary" : "ghost"}
-            size="sm"
-            onClick={() => setFilter("disabled")}
-          >
-            Disabled
-          </Button>
+          {(["all", "enabled", "disabled"] as const).map((f) => (
+            <Button
+              key={f}
+              type="button"
+              variant={filter === f ? "secondary" : "ghost"}
+              size="sm"
+              className="min-w-[72px]"
+              onClick={() => setFilter(f)}
+            >
+              {f === "all" ? "All" : f === "enabled" ? "Enabled" : "Disabled"}
+            </Button>
+          ))}
         </div>
-        <div className="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
           <Badge variant={activeCount > 0 ? "default" : "secondary"}>
             {activeCount} active
           </Badge>
-          <span>/ {accounts.length} total</span>
+          <span className="text-muted-foreground/60">/ {accounts.length} total</span>
         </div>
       </div>}
 
       {filtered.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+        <div className="flex flex-col items-center gap-3 py-16 text-muted-foreground">
           <SearchX className="h-8 w-8 opacity-50" />
           <p className="text-sm">No accounts match your search.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((a) => (
-            <div key={a.username}>
+            <div key={a.username} className="bg-background">
               <AccountCard
                 username={a.username}
                 enabled={a.enabled}

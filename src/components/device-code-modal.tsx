@@ -47,8 +47,8 @@ export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
         </DialogHeader>
 
         <div className="space-y-4">
-          <div className="flex items-center gap-2 rounded-lg border bg-background p-3">
-            <code className="flex-1 text-center text-lg font-bold tracking-widest text-amber-700 dark:text-amber-400">
+          <div className="flex items-center gap-2 border border-border bg-muted p-3">
+            <code className="flex-1 text-center text-lg font-bold tracking-widest text-accent">
               {code.userCode}
             </code>
             <Button
@@ -60,7 +60,7 @@ export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
               aria-label="Copy authorization code"
             >
               {copied ? (
-                <Check className="h-4 w-4 text-green-600" />
+                <Check className="h-4 w-4 text-accent" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
@@ -68,15 +68,15 @@ export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
             </Button>
           </div>
 
-          <a
-            href={code.verificationUri}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full"
+            render={<a href={code.verificationUri} target="_blank" rel="noopener noreferrer" />}
           >
             <ExternalLink className="h-4 w-4" />
             Open {new URL(code.verificationUri).hostname}
-          </a>
+          </Button>
 
           {isExpired && (
             <p className="text-center text-xs text-destructive">

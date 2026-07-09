@@ -28,13 +28,18 @@ export default async function AdminUsersPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Users</h1>
-        <Button render={<Link href="/admin/users/new" />} nativeButton={false}>
-          <UserPlus className="h-4 w-4" />
-          New user
-        </Button>
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Users</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage dashboard users</p>
+        </div>
+        <Link href="/admin/users/new">
+          <Button>
+            <UserPlus className="h-4 w-4" />
+            New user
+          </Button>
+        </Link>
       </div>
       <UsersTable users={users} />
     </div>

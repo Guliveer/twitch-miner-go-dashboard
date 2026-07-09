@@ -57,15 +57,18 @@ export function NewAccountModal() {
           <DialogTitle>Add bot account</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-1">
+          <div className="space-y-1.5">
             <Label htmlFor="username">Twitch username</Label>
             <Input id="username" {...register("username")} placeholder="my_twitch_name" />
             {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Creating…" : "Create"}
-          </Button>
+          <div className="flex justify-end gap-2 pt-2">
+            <DialogTrigger render={<Button variant="outline" />}>Cancel</DialogTrigger>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? "Creating…" : "Create"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

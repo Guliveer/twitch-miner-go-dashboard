@@ -11,12 +11,11 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -27,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import {
   ArrowLeft, SlidersHorizontal, Users, TrendingUp,
   Bell, Eye, Download, KeyRound, Save,
@@ -109,13 +107,13 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
           e.preventDefault();
           setSaveDialogOpen(true);
         }}
-        className="space-y-6"
       >
-        <div className="flex items-center justify-between gap-4">
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/dashboard"
-              className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
               <ArrowLeft className="h-4 w-4" />
               Back
@@ -126,7 +124,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
                 value={initialConfig.username}
                 onValueChange={handleAccountChange}
               >
-                <SelectTrigger className="w-auto border-none bg-transparent shadow-none px-1 text-2xl font-bold h-auto focus:ring-0">
+                <SelectTrigger className="w-auto border-none bg-transparent shadow-none px-0 text-2xl font-bold tracking-tight h-auto focus:border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="start">
@@ -136,7 +134,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
                 </SelectContent>
               </Select>
             ) : (
-              <h1 className="text-2xl font-bold truncate">{initialConfig.username}</h1>
+              <h1 className="text-2xl font-bold tracking-tight truncate">{initialConfig.username}</h1>
             )}
           </div>
 
@@ -163,14 +161,14 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               <Save className="h-4 w-4" />
               {isPending ? "Saving…" : "Save changes"}
               {isDirty && !isPending && (
-                <span className="ml-1 h-1.5 w-1.5 rounded-full bg-current opacity-70" />
+                <span className="ml-1 h-1.5 w-1.5 bg-accent" />
               )}
             </Button>
           </div>
         </div>
 
         <Tabs defaultValue="general">
-          <TabsList className="w-full overflow-x-auto">
+          <TabsList className="w-full border-b border-border">
             <TabsTrigger value="general">
               <SlidersHorizontal className="h-4 w-4" />
               General
@@ -215,7 +213,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               will pick up the new config on next restart.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setSaveDialogOpen(false)}>
               Cancel
             </Button>
@@ -223,7 +221,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               <Save className="h-4 w-4" />
               Save
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 
@@ -240,14 +238,14 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               Switching to <strong>{switchTarget}</strong> will discard them.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => setSwitchTarget(null)}>
               Stay here
             </Button>
             <Button variant="destructive" onClick={handleSwitchConfirmed}>
               Discard and switch
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
 

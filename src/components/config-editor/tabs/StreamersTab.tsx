@@ -52,10 +52,10 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
   return (
     <div className="space-y-6">
       {/* Default settings for all streamers */}
-      <div className="rounded-md border p-4 space-y-4">
-        <p className="text-sm font-medium">Default settings for all streamers</p>
+      <div className="border border-border p-5 space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-wider">Default settings for all streamers</p>
         <p className="text-xs text-muted-foreground -mt-2">
-          These apply to every streamer unless overridden individually below.
+          These apply to every streamer unless overridden individually.
         </p>
         <div className="grid grid-cols-2 gap-3">
           {STREAMER_BOOL_KEYS.map((key) => (
@@ -86,11 +86,9 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
-      <Separator />
-
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          {visibleFields.length} streamers
+          {visibleFields.length} streamer{visibleFields.length !== 1 ? "s" : ""}
         </p>
         <Button type="button" variant="outline" size="sm" onClick={addStreamer}>
           Add streamer
@@ -102,7 +100,7 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
           <AccordionItem
             key={id}
             value={id}
-            className="border rounded-md px-3"
+            className="border border-border px-3"
           >
             <AccordionTrigger className="py-3">
               <span className="text-sm font-medium">
@@ -120,8 +118,7 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                 />
               </div>
 
-              <Separator />
-              <p className="text-xs text-muted-foreground uppercase tracking-wide">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 Per-streamer overrides
               </p>
 

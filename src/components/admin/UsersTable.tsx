@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { resetUserPassword } from "@/actions/auth";
-import { KeyRound } from "lucide-react";
+import { KeyRound, Copy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -41,50 +41,52 @@ export function UsersTable({ users }: { users: User[] }) {
 
   return (
     <>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="border-b text-left">
-            <th className="pb-2 pr-4">Name</th>
-            <th className="pb-2 pr-4">Email</th>
-            <th className="pb-2 pr-4">Role</th>
-            <th className="pb-2 pr-4">Must change password</th>
-            <th className="pb-2">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((u) => (
-            <tr key={u.id} className="border-b [&:nth-child(even)]:bg-muted/30">
-              <td className="py-2 pr-4 text-muted-foreground">
-                {u.name ?? <span className="italic">—</span>}
-              </td>
-              <td className="py-2 pr-4">{u.email}</td>
-              <td className="py-2 pr-4">
-                <Badge variant={u.role === "admin" ? "default" : "secondary"}>
-                  {u.role}
-                </Badge>
-              </td>
-              <td className="py-2 pr-4">
-                {u.mustChangePassword ? (
-                  <Badge variant="destructive">Yes</Badge>
-                ) : (
-                  "No"
-                )}
-              </td>
-              <td className="py-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={pendingUserId === u.id}
-                  onClick={() => handleReset(u.id)}
-                >
-                  <KeyRound className="h-4 w-4" />
-                  {pendingUserId === u.id ? "Resetting…" : "Reset password"}
-                </Button>
-              </td>
+      <div className="border border-border overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Name</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Role</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Must change password</th>
+              <th className="p-3 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {users.map((u) => (
+              <tr key={u.id} className="border-b border-border last:border-b-0">
+                <td className="p-3 text-muted-foreground">
+                  {u.name ?? <span className="italic text-muted-foreground">—</span>}
+                </td>
+                <td className="p-3">{u.email}</td>
+                <td className="p-3">
+                  <Badge variant={u.role === "admin" ? "default" : "secondary"}>
+                    {u.role}
+                  </Badge>
+                </td>
+                <td className="p-3">
+                  {u.mustChangePassword ? (
+                    <Badge variant="destructive">Yes</Badge>
+                  ) : (
+                    <span className="text-muted-foreground">No</span>
+                  )}
+                </td>
+                <td className="p-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={pendingUserId === u.id}
+                    onClick={() => handleReset(u.id)}
+                  >
+                    <KeyRound className="h-4 w-4" />
+                    {pendingUserId === u.id ? "Resetting…" : "Reset password"}
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <Dialog open={!!tempPassword} onOpenChange={() => setTempPassword(null)}>
         <DialogContent>
@@ -94,10 +96,11 @@ export function UsersTable({ users }: { users: User[] }) {
           <p className="text-sm text-muted-foreground">
             Share this with the user. It is shown only once.
           </p>
-          <code className="block bg-muted p-3 rounded font-mono text-lg select-all">
+          <code className="block bg-muted p-3 font-mono text-lg select-all">
             {tempPassword}
           </code>
           <Button onClick={() => { navigator.clipboard.writeText(tempPassword ?? ""); }}>
+            <Copy className="h-4 w-4" />
             Copy
           </Button>
         </DialogContent>

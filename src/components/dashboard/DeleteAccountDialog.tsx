@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,7 +20,7 @@ export function DeleteAccountDialog({ username }: { username: string }) {
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="destructive" size="sm" />}>
-        <Trash2 className="h-4 w-4" />
+        <Trash2 className="h-3.5 w-3.5" />
         Delete
       </DialogTrigger>
       <DialogContent>
@@ -31,7 +30,8 @@ export function DeleteAccountDialog({ username }: { username: string }) {
             This permanently removes the bot account and all its configuration. This cannot be undone.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
+        <div className="flex justify-end gap-2 pt-2">
+          <DialogTrigger render={<Button variant="outline" />}>Cancel</DialogTrigger>
           <Button
             variant="destructive"
             disabled={isPending}
@@ -41,7 +41,7 @@ export function DeleteAccountDialog({ username }: { username: string }) {
           >
             {isPending ? "Deleting…" : "Delete"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { Tv2, ShieldCheck, Settings, User, LogOut } from "lucide-react";
+import { Tv2, LayoutDashboard, Users, Bot, Settings, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
@@ -30,9 +30,9 @@ export function Navbar({ isAdmin }: Props) {
       <Link
         href={href}
         className={cn(
-          "flex items-center gap-1.5 text-sm transition-colors",
+          "relative text-xs font-semibold uppercase tracking-wider transition-colors pb-1 inline-flex items-center gap-1.5",
           active
-            ? "text-foreground font-medium"
+            ? "text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent"
             : "text-muted-foreground hover:text-foreground",
         )}
       >
@@ -44,22 +44,28 @@ export function Navbar({ isAdmin }: Props) {
   };
 
   return (
-    <header className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto max-w-5xl px-6 py-3 flex items-center gap-6">
+    <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <div className="mx-auto max-w-5xl px-6 py-4 flex items-center gap-8">
         <Link
           href="/dashboard"
-          className="flex items-center gap-1.5 font-semibold hover:opacity-80 transition-opacity"
+          className="flex items-center gap-2 font-semibold tracking-tight hover:opacity-80 transition-opacity"
         >
           <Tv2 className="h-4 w-4" />
-          Twitch Miner
+          <span className="text-sm">Twitch Miner</span>
         </Link>
 
-        <nav className="flex items-center gap-4">
-          {navLink("/dashboard", "Dashboard", null)}
-          {isAdmin && navLink("/admin", "Admin", <ShieldCheck className="h-4 w-4" />)}
+        <nav className="flex items-center gap-6">
+          {navLink("/dashboard", "Dashboard", <LayoutDashboard className="h-3.5 w-3.5" />)}
+          {isAdmin && (
+            <>
+              <span className="h-4 w-px bg-border" />
+              {navLink("/admin/users", "Users", <Users className="h-3.5 w-3.5" />)}
+              {navLink("/admin/accounts", "Bot accounts", <Bot className="h-3.5 w-3.5" />)}
+            </>
+          )}
         </nav>
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex items-center gap-2">
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -67,7 +73,7 @@ export function Navbar({ isAdmin }: Props) {
             >
               <User className="h-4 w-4" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-40">
               <DropdownMenuItem>
                 <Link href="/settings" className="flex items-center gap-2 w-full">
                   <Settings className="h-4 w-4" />

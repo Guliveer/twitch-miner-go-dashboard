@@ -26,7 +26,7 @@ export function NotificationsTab() {
   return (
     <Accordion multiple className="space-y-2">
       {/* Telegram */}
-      <AccordionItem value="telegram" className="border rounded-md px-3">
+      <AccordionItem value="telegram" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch
@@ -81,7 +81,7 @@ export function NotificationsTab() {
       </AccordionItem>
 
       {/* Discord */}
-      <AccordionItem value="discord" className="border rounded-md px-3">
+      <AccordionItem value="discord" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch
@@ -118,7 +118,7 @@ export function NotificationsTab() {
       </AccordionItem>
 
       {/* Webhook */}
-      <AccordionItem value="webhook" className="border rounded-md px-3">
+      <AccordionItem value="webhook" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch
@@ -175,7 +175,7 @@ export function NotificationsTab() {
       </AccordionItem>
 
       {/* Matrix */}
-      <AccordionItem value="matrix" className="border rounded-md px-3">
+      <AccordionItem value="matrix" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch
@@ -217,7 +217,7 @@ export function NotificationsTab() {
       </AccordionItem>
 
       {/* Pushover */}
-      <AccordionItem value="pushover" className="border rounded-md px-3">
+      <AccordionItem value="pushover" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch
@@ -255,7 +255,7 @@ export function NotificationsTab() {
       </AccordionItem>
 
       {/* Gotify */}
-      <AccordionItem value="gotify" className="border rounded-md px-3">
+      <AccordionItem value="gotify" className="border border-border px-3">
         <AccordionTrigger>
           <div className="flex items-center gap-3">
             <Switch

@@ -32,20 +32,20 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
   } = useFormContext<AccountConfigForm>();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex items-center gap-3">
         <Switch
           checked={watch("enabled") ?? true}
           onCheckedChange={(v) => setValue("enabled", v)}
         />
-        <Label>Account enabled</Label>
+        <Label className="text-xs">Account enabled</Label>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-1">
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-1.5">
           <Label>
             Max watch streams
-            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(max 10)</span>}
+            {!isAdmin && <span className="ml-1.5 text-[10px] text-muted-foreground">(max 10)</span>}
           </Label>
           <Input
             type="number"
@@ -54,7 +54,7 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
             {...register("max_watch_streams", numRegister())}
           />
         </div>
-        <div className={`space-y-1 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
+        <div className={`space-y-1.5 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
           <Label>Proxy (optional)</Label>
           <Input
             placeholder="socks5://127.0.0.1:1080"
@@ -65,7 +65,7 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-1.5">
         <Label>Watch priority (ordered)</Label>
         <TagInput
           value={watch("priority")}
@@ -77,14 +77,14 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
         </p>
       </div>
 
-      <div className="space-y-3 rounded-md border p-4">
-        <p className="font-medium text-sm">Features</p>
+      <div className="border border-border p-5 space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-wider">Features</p>
         <div className="flex items-center gap-3">
           <Switch
             checked={watch("features.claim_drops_startup")}
             onCheckedChange={(v) => setValue("features.claim_drops_startup", v)}
           />
-          <Label>Claim drops on startup</Label>
+          <Label className="text-xs">Claim drops on startup</Label>
         </div>
         <div className={`flex items-center gap-3 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
           <Switch
@@ -92,23 +92,23 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
             onCheckedChange={(v) => setValue("features.enable_analytics", v)}
             disabled={!isAdmin}
           />
-          <Label>
+          <Label className="text-xs">
             Enable analytics
-            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(admin only)</span>}
+            {!isAdmin && <span className="ml-1.5 text-[10px] text-muted-foreground">(admin only)</span>}
           </Label>
         </div>
       </div>
 
-      <div className="space-y-3 rounded-md border p-4">
-        <p className="font-medium text-sm">Followers</p>
+      <div className="border border-border p-5 space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-wider">Followers</p>
         <div className="flex items-center gap-3">
           <Switch
             checked={watch("followers.enabled")}
             onCheckedChange={(v) => setValue("followers.enabled", v)}
           />
-          <Label>Watch followed channels</Label>
+          <Label className="text-xs">Watch followed channels</Label>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <Label>Order</Label>
           <Select
             value={watch("followers.order")}

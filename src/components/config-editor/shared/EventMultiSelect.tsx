@@ -41,7 +41,7 @@ export function EventMultiSelect({ value, onChange }: Props) {
             key={event}
             type="button"
             className={cn(
-              "flex items-center gap-2 w-full px-2 py-1.5 text-sm rounded hover:bg-accent",
+              "flex items-center gap-2 w-full px-2 py-1.5 text-sm hover:bg-muted transition-colors",
               value.includes(event) && "font-medium"
             )}
             onClick={() => toggle(event)}

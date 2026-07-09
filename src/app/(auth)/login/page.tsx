@@ -8,8 +8,7 @@ import { signIn } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { LogIn, Tv2 } from "lucide-react";
+import { Tv2 } from "lucide-react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 const schema = z.object({
@@ -36,40 +35,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center gap-6"
-      style={{
-        backgroundImage: "radial-gradient(circle, hsl(var(--foreground) / 0.06) 1px, transparent 1px)",
-        backgroundSize: "24px 24px",
-      }}
-    >
-      <div className="flex items-center gap-2 text-foreground">
-        <Tv2 className="h-6 w-6" />
-        <span className="text-xl font-semibold">Twitch Miner</span>
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+      <div className="w-full max-w-sm px-6">
+        <div className="flex flex-col items-center gap-3 mb-10">
+          <Tv2 className="h-6 w-6 text-accent" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Twitch Miner
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Sign in to manage your bot accounts
+          </p>
+        </div>
 
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Sign in</CardTitle>
-        </CardHeader>
-        <CardContent className="pb-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register("password")} />
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              <LogIn className="h-4 w-4" />
-              {isSubmitting ? "Signing in…" : "Sign in"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" {...register("email")} placeholder="you@example.com" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" {...register("password")} placeholder="Enter your password" />
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in…" : "Sign in"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

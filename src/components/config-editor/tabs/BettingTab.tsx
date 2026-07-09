@@ -46,15 +46,15 @@ export function BettingTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Switch
-          checked={makesPredictions}
-          onCheckedChange={(v) =>
-            setValue("streamer_defaults.make_predictions", v)
-          }
-        />
-        <Label>Make predictions (default for all streamers)</Label>
-      </div>
+        <div className="flex items-center gap-3">
+          <Switch
+            checked={makesPredictions}
+            onCheckedChange={(v) =>
+              setValue("streamer_defaults.make_predictions", v)
+            }
+          />
+          <Label className="text-xs">Make predictions (default for all streamers)</Label>
+        </div>
 
       <fieldset disabled={!makesPredictions} className="space-y-4 disabled:opacity-50">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -145,18 +145,18 @@ export function BettingTab() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3">
           <Switch
             checked={watch("streamer_defaults.bet.stealth_mode") ?? false}
             onCheckedChange={(v) =>
               setValue("streamer_defaults.bet.stealth_mode", v)
             }
           />
-          <Label>Stealth mode</Label>
+          <Label className="text-xs">Stealth mode</Label>
         </div>
 
-        <div className="space-y-3 rounded-md border p-4">
-          <p className="text-sm font-medium">Filter condition</p>
+        <div className="border border-border p-5 space-y-4">
+          <p className="text-xs font-semibold uppercase tracking-wider">Filter condition</p>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="space-y-1">
               <Label>By</Label>
@@ -172,16 +172,16 @@ export function BettingTab() {
                   )
                 }
               >
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {OUTCOME_KEYS.map((k) => (
-                    <SelectItem key={k} value={k}>
-                      {k}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
+          <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {OUTCOME_KEYS.map((k) => (
+                  <SelectItem key={k} value={k}>
+                    {k}
+                  </SelectItem>
+                ))}
+              </SelectContent>
               </Select>
             </div>
             <div className="space-y-1">

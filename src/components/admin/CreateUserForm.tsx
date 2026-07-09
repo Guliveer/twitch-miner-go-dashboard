@@ -14,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Copy } from "lucide-react";
 
 const schema = z.object({
   email: z.string().email(),
@@ -59,15 +60,15 @@ export function CreateUserForm() {
 
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 max-w-sm">
-        <div className="space-y-1">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 max-w-sm">
+        <div className="space-y-1.5">
           <Label>Name</Label>
           <Input {...register("name")} placeholder="Jan Kowalski" />
           {errors.name && (
-            <p className="text-sm text-destructive">{errors.name.message}</p>
+            <p className="text-xs text-destructive">{errors.name.message}</p>
           )}
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1.5">
           <Label>Email</Label>
           <Input
             type="email"
@@ -75,10 +76,10 @@ export function CreateUserForm() {
             placeholder="user@example.com"
           />
           {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
+            <p className="text-xs text-destructive">{errors.email.message}</p>
           )}
         </div>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-xs text-destructive">{error}</p>}
         <Button type="submit" disabled={isPending}>
           {isPending ? "Creating…" : "Create user"}
         </Button>
@@ -92,7 +93,7 @@ export function CreateUserForm() {
           <p className="text-sm text-muted-foreground">
             Share this temporary password. Shown once.
           </p>
-          <code className="block bg-muted p-3 rounded font-mono text-lg select-all">
+          <code className="block bg-muted p-3 font-mono text-lg select-all">
             {tempPassword}
           </code>
           <Button
@@ -100,6 +101,7 @@ export function CreateUserForm() {
               navigator.clipboard.writeText(tempPassword ?? "");
             }}
           >
+            <Copy className="h-4 w-4" />
             Copy
           </Button>
         </DialogContent>

@@ -9,13 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { KeyRound } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 const schema = z
   .object({
@@ -50,51 +43,52 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Set your password</CardTitle>
-          <CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="w-full max-w-sm px-6">
+        <div className="flex flex-col items-center gap-3 mb-10">
+          <KeyRound className="h-6 w-6 text-accent" />
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+            Set your password
+          </h1>
+          <p className="text-sm text-muted-foreground text-center">
             Enter your temporary password and choose a new one.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-1">
-              <Label htmlFor="currentPassword">Current (temporary) password</Label>
-              <Input id="currentPassword" type="password" {...register("currentPassword")} />
-              {errors.currentPassword && (
-                <p className="text-sm text-destructive">
-                  {errors.currentPassword.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="password">New password</Label>
-              <Input id="password" type="password" {...register("password")} />
-              {errors.password && (
-                <p className="text-sm text-destructive">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="confirm">Confirm new password</Label>
-              <Input id="confirm" type="password" {...register("confirm")} />
-              {errors.confirm && (
-                <p className="text-sm text-destructive">
-                  {errors.confirm.message}
-                </p>
-              )}
-            </div>
-            {error && <p className="text-sm text-destructive">{error}</p>}
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              <KeyRound className="h-4 w-4" />
-              {isSubmitting ? "Saving…" : "Set password"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="currentPassword">Current (temporary) password</Label>
+            <Input id="currentPassword" type="password" {...register("currentPassword")} />
+            {errors.currentPassword && (
+              <p className="text-sm text-destructive">
+                {errors.currentPassword.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="password">New password</Label>
+            <Input id="password" type="password" {...register("password")} />
+            {errors.password && (
+              <p className="text-sm text-destructive">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="confirm">Confirm new password</Label>
+            <Input id="confirm" type="password" {...register("confirm")} />
+            {errors.confirm && (
+              <p className="text-sm text-destructive">
+                {errors.confirm.message}
+              </p>
+            )}
+          </div>
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Saving…" : "Set password"}
+          </Button>
+        </form>
+      </div>
     </div>
   );
 }

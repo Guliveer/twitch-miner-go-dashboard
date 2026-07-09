@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { updateDisplayName, changePasswordWithVerification } from "@/actions/auth";
@@ -90,28 +89,29 @@ export function SettingsForm({ name, email, botAccounts = [] }: { name: string; 
     : email[0]?.toUpperCase() ?? "?";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-base font-semibold select-none">
+    <div className="space-y-8">
+      {/* Profile info */}
+      <div className="flex items-center gap-4 pb-2">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-border bg-muted text-sm font-semibold select-none">
           {initials}
         </div>
         <div className="min-w-0">
-          <p className="truncate font-medium">{name || "—"}</p>
-          <p className="truncate text-sm text-muted-foreground">{email}</p>
+          <p className="text-sm font-medium truncate">{name || "—"}</p>
+          <p className="text-xs text-muted-foreground truncate">{email}</p>
         </div>
       </div>
 
       <div className="relative flex items-center gap-3">
         <Separator className="flex-1" />
-        <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wide">Profile</span>
+        <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Profile</span>
         <Separator className="flex-1" />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Display name</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="border border-border">
+        <div className="border-b border-border p-5">
+          <h3 className="text-xs font-semibold uppercase tracking-wider">Display name</h3>
+        </div>
+        <div className="p-5">
           <form onSubmit={nameForm.handleSubmit(onSaveName)} className="space-y-4">
             <div className="space-y-1.5">
               <Label>Email</Label>
@@ -128,20 +128,20 @@ export function SettingsForm({ name, email, botAccounts = [] }: { name: string; 
               {isPendingName ? "Saving…" : "Save"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       <div className="relative flex items-center gap-3">
         <Separator className="flex-1" />
-        <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wide">Security</span>
+        <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Security</span>
         <Separator className="flex-1" />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Change password</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="border border-border">
+        <div className="border-b border-border p-5">
+          <h3 className="text-xs font-semibold uppercase tracking-wider">Change password</h3>
+        </div>
+        <div className="p-5">
           <form onSubmit={pwdForm.handleSubmit(onChangePassword)} className="space-y-4">
             <div className="space-y-1.5">
               <Label>Current password</Label>
@@ -169,46 +169,44 @@ export function SettingsForm({ name, email, botAccounts = [] }: { name: string; 
               {isPendingPwd ? "Changing…" : "Change password"}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {botAccounts.length > 0 && (
         <>
           <div className="relative flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wide">Bot accounts</span>
+            <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Bot accounts</span>
             <Separator className="flex-1" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-px border border-border">
             {botAccounts.map((a) => (
-              <Card key={a.username}>
-                <CardContent className="pt-4 pb-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-medium">
-                      <Bot className="h-4 w-4 text-muted-foreground" />
-                      {a.username}
-                    </div>
-                    <Badge variant={a.enabled ? "default" : "secondary"}>
-                      {a.enabled ? "Enabled" : "Disabled"}
-                    </Badge>
+              <div key={a.username} className="p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Bot className="h-4 w-4 text-muted-foreground" />
+                    {a.username}
                   </div>
-                  <div className="grid grid-cols-1 gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5 shrink-0" />
-                      <span className="text-foreground/60">Last saved:</span>
-                      <span>{formatDate(a.updated_at)}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <RefreshCw className="h-3.5 w-3.5 shrink-0" />
-                      <span className="text-foreground/60">Last started:</span>
-                      <span>
-                        {a.last_started_at ? formatDate(a.last_started_at) : "Never"}
-                      </span>
-                    </div>
+                  <Badge variant={a.enabled ? "default" : "secondary"}>
+                    {a.enabled ? "Enabled" : "Disabled"}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-1 gap-1.5 text-xs text-muted-foreground sm:grid-cols-2">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-foreground/60">Last saved:</span>
+                    <span>{formatDate(a.updated_at)}</span>
                   </div>
-                </CardContent>
-              </Card>
+                  <div className="flex items-center gap-1.5">
+                    <RefreshCw className="h-3.5 w-3.5 shrink-0" />
+                    <span className="text-foreground/60">Last started:</span>
+                    <span>
+                      {a.last_started_at ? formatDate(a.last_started_at) : "Never"}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         </>

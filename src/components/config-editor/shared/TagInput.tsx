@@ -2,7 +2,6 @@
 
 import { useState, KeyboardEvent } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 
 type Props = {
@@ -30,7 +29,7 @@ export function TagInput({ value, onChange, placeholder = "Add item…" }: Props
   };
 
   return (
-    <div className="flex flex-wrap gap-1 border rounded-md p-2 min-h-10">
+    <div className="flex flex-wrap gap-1 border border-border p-2 min-h-10">
       {value.map((item) => (
         <Badge key={item} variant="secondary" className="gap-1">
           {item}

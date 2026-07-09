@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t px-6 py-3 text-xs text-muted-foreground text-center">
+    <footer className="border-t border-border px-6 py-4 text-xs text-muted-foreground text-center">
       Account management dashboard for{" "}
       <a
         href="https://github.com/Guliveer/twitch-miner-go"

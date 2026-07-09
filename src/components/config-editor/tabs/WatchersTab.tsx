@@ -72,13 +72,16 @@ export function WatchersTab() {
         <div className="space-y-2">
           <Label>Categories</Label>
           {catFields.map((field, i) => (
-            <div key={field.id} className="flex gap-2">
-              <Input
-                {...register(`category_watcher.categories.${i}.slug`)}
-                placeholder="just-chatting"
-                className="max-w-xs"
-              />
-              <div className="min-w-fit">
+            <div key={field.id} className="flex gap-2 items-end">
+              <div className="space-y-1 min-w-0">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Slug</span>
+                <Input
+                  {...register(`category_watcher.categories.${i}.slug`)}
+                  placeholder="just-chatting"
+                />
+              </div>
+              <div className="space-y-1">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Drops only</span>
                 <Select
                   value={
                     watch(`category_watcher.categories.${i}.drops_only`) ===
@@ -115,6 +118,7 @@ export function WatchersTab() {
                 type="button"
                 variant="ghost"
                 size="sm"
+                className="mb-px"
                 onClick={() => removeCat(i)}
               >
                 <X className="h-4 w-4" />

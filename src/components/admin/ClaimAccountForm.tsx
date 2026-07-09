@@ -40,10 +40,10 @@ export function ClaimAccountForm({ unclaimedAccounts, users }: Props) {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="border border-border p-5 space-y-4">
       <div>
-        <h2 className="text-lg font-semibold">Assign unclaimed bot accounts</h2>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-xs font-semibold uppercase tracking-wider">Assign unclaimed bot accounts</p>
+        <p className="text-sm text-muted-foreground mt-1">
           {unclaimedAccounts.length} unclaimed account{unclaimedAccounts.length !== 1 ? "s" : ""} in the database.
         </p>
       </div>
@@ -58,7 +58,7 @@ export function ClaimAccountForm({ unclaimedAccounts, users }: Props) {
             ))}
           </SelectContent>
         </Select>
-        <span className="text-sm text-muted-foreground">→</span>
+        <span className="text-xs text-muted-foreground">→</span>
         <Select value={userId} onValueChange={(v) => v && setUserId(v)}>
           <SelectTrigger className="w-52">
             <SelectValue>{selectedUserLabel}</SelectValue>
@@ -74,7 +74,7 @@ export function ClaimAccountForm({ unclaimedAccounts, users }: Props) {
           {isPending ? "Assigning…" : "Assign"}
         </Button>
       </form>
-      {message && <p className="text-sm text-muted-foreground">{message}</p>}
+      {message && <p className="text-xs text-muted-foreground">{message}</p>}
     </div>
   );
 }
