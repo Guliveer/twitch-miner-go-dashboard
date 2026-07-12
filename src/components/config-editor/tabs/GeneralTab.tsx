@@ -50,7 +50,7 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
           <Input
             type="number"
             min={1}
-            max={10}
+            {...(!isAdmin ? { max: 10 } : {})}
             {...register("max_watch_streams", numRegister())}
           />
         </div>

@@ -1,7 +1,15 @@
 "use client";
 
 import { useForm, FormProvider } from "react-hook-form";
-import { type AccountConfigForm } from "@/lib/config-schema";
+import { z, type ZodTypeAny } from "zod";
+import {
+  type AccountConfigForm,
+  generalTabSchema,
+  streamersTabSchema,
+  bettingTabSchema,
+  notificationsTabSchema,
+  watchersTabSchema,
+} from "@/lib/config-schema";
 import { updateBotAccount } from "@/actions/accounts";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -56,6 +64,16 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
   const [isPending, startTransition] = useTransition();
   const isDirty = methods.formState.isDirty;
 
+  const [activeTab, setActiveTab] = useState("general");
+
+  const TAB_SCHEMAS: Record<string, ZodTypeAny> = {
+    general: generalTabSchema,
+    streamers: streamersTabSchema,
+    betting: bettingTabSchema,
+    notifications: notificationsTabSchema,
+    watchers: watchersTabSchema,
+  };
+
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const pendingCode = useDeviceCode(initialConfig.username);
 
@@ -67,12 +85,24 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
 
   const handleSaveConfirmed = () => {
     setSaveDialogOpen(false);
-    methods.handleSubmit((data) => {
+    const data = methods.getValues();
+    const schema = TAB_SCHEMAS[activeTab];
+    if (schema) {
+      const result = schema.safeParse(data);
+      if (!result.success) {
+        const messages = result.error.issues.map(
+          (i) => `${i.path.join(".")}: ${i.message}`,
+        );
+        toast.error(`Validation errors on ${activeTab} tab:\n${messages.join("\n")}`);
+        return;
+      }
+    }
+    methods.handleSubmit((validated) => {
       const cleaned = {
-        ...data,
-        streamers: data.streamers.filter((s) => s.username.trim().length > 0),
+        ...validated,
+        streamers: validated.streamers.filter((s) => s.username.trim().length > 0),
       };
-      const removedCount = data.streamers.length - cleaned.streamers.length;
+      const removedCount = validated.streamers.length - cleaned.streamers.length;
       startTransition(async () => {
         try {
           await updateBotAccount(cleaned.username, cleaned);
@@ -167,7 +197,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
           </div>
         </div>
 
-        <Tabs defaultValue="general">
+        <Tabs defaultValue="general" onValueChange={setActiveTab}>
           <TabsList className="w-full border-b border-border">
             <TabsTrigger value="general">
               <SlidersHorizontal className="h-4 w-4" />

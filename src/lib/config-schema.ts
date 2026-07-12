@@ -52,7 +52,7 @@ const filterConditionSchema = z.object({
   value: z.number(),
 });
 
-const betSettingsSchema = z.object({
+export const betSettingsSchema = z.object({
   strategy: z.enum(STRATEGIES).optional(),
   percentage: z.number().int().optional(),
   percentage_gap: z.number().int().optional(),
@@ -182,6 +182,38 @@ export const accountConfigSchema = z.object({
     order: z.enum(FOLLOWERS_ORDERS),
   }),
   notifications: notificationsSchema,
+});
+
+export const generalTabSchema = accountConfigSchema.pick({
+  enabled: true,
+  max_watch_streams: true,
+  priority: true,
+  proxy: true,
+  features: true,
+  followers: true,
+});
+
+export const streamersTabSchema = accountConfigSchema.pick({
+  streamer_defaults: true,
+  streamers: true,
+  blacklist: true,
+  category_blacklist: true,
+});
+
+export const bettingTabSchema = z.object({
+  streamer_defaults: z.object({
+    make_predictions: z.boolean().optional(),
+    bet: betSettingsSchema.optional(),
+  }).optional(),
+});
+
+export const notificationsTabSchema = accountConfigSchema.pick({
+  notifications: true,
+});
+
+export const watchersTabSchema = accountConfigSchema.pick({
+  category_watcher: true,
+  team_watcher: true,
 });
 
 export type AccountConfigForm = z.infer<typeof accountConfigSchema>;

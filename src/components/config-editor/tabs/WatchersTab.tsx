@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DurationInput } from "../shared/DurationInput";
+import { parseCategorySlug, isTwitchCategoryUrl, parseTeamSlug, isTwitchTeamUrl } from "@/lib/twitch-slug";
 import { X } from "lucide-react";
 
 export function WatchersTab() {
@@ -74,10 +75,17 @@ export function WatchersTab() {
           {catFields.map((field, i) => (
             <div key={field.id} className="flex gap-2 items-end">
               <div className="space-y-1 min-w-0">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Slug</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Category</span>
                 <Input
                   {...register(`category_watcher.categories.${i}.slug`)}
-                  placeholder="just-chatting"
+                  placeholder="rust / just-chatting / or paste URL"
+                  onPaste={(e) => {
+                    const text = e.clipboardData.getData("text");
+                    if (isTwitchCategoryUrl(text)) {
+                      e.preventDefault();
+                      setValue(`category_watcher.categories.${i}.slug`, parseCategorySlug(text));
+                    }
+                  }}
                 />
               </div>
               <div className="space-y-1">
@@ -161,8 +169,15 @@ export function WatchersTab() {
             <div key={field.id} className="flex gap-2">
               <Input
                 {...register(`team_watcher.teams.${i}.name`)}
-                placeholder="rainbow6"
+                placeholder="rainbow6 / otk / or paste URL"
                 className="max-w-xs"
+                onPaste={(e) => {
+                  const text = e.clipboardData.getData("text");
+                  if (isTwitchTeamUrl(text)) {
+                    e.preventDefault();
+                    setValue(`team_watcher.teams.${i}.name`, parseTeamSlug(text));
+                  }
+                }}
               />
               <Button
                 type="button"
