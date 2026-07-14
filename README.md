@@ -3,13 +3,13 @@
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Neon](https://img.shields.io/badge/Neon-PostgreSQL-00E5A0?style=for-the-badge&logo=postgresql&logoColor=white)](https://neon.tech)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![CI](https://img.shields.io/github/actions/workflow/status/Guliveer/twitch-miner-go-dashboard/ci.yml?style=for-the-badge&logo=github&label=CI)](https://github.com/Guliveer/twitch-miner-go-dashboard/actions)
 [![License](https://img.shields.io/github/license/Guliveer/twitch-miner-go-dashboard?style=for-the-badge)](LICENSE)
 
 Web dashboard for managing [twitch-miner-go](https://github.com/Guliveer/twitch-miner-go) bot configurations.
 
-Multi-tenant and invite-only — the owner creates accounts for users, each person sees and manages only their own bot accounts. Built on [Neon](https://neon.tech) PostgreSQL and Neon Auth (Better Auth under the hood), deployed to [Vercel](https://vercel.com).
+Multi-tenant and invite-only — the owner creates accounts for users, each person sees and manages only their own bot accounts. Built on [Supabase](https://supabase.com) PostgreSQL and Supabase Auth, deployed to [Vercel](https://vercel.com).
 
 ---
 
@@ -21,7 +21,7 @@ Multi-tenant and invite-only — the owner creates accounts for users, each pers
 4. [Prerequisites](#prerequisites)
 5. [Local setup](#local-setup)
    - [1. Clone and install](#1-clone-and-install)
-   - [2. Create a Neon project](#2-create-a-neon-project)
+   - [2. Create a Supabase project](#2-create-a-supabase-project)
    - [3. Configure environment variables](#3-configure-environment-variables)
    - [4. Run database migrations](#4-run-database-migrations)
    - [5. Create the first admin account](#5-create-the-first-admin-account)
@@ -43,10 +43,10 @@ Multi-tenant and invite-only — the owner creates accounts for users, each pers
 The dashboard is a thin UI layer on top of the `accounts` table that `twitch-miner-go` already uses when running in database mode (`DB_ENABLED=true`). It does **not** replace the bot — it only edits the `config_json` column that the bot reads.
 
 ```
-Browser → Dashboard (Next.js) → Neon PostgreSQL
-                                      ↑
-                              twitch-miner-go bot
-                              (reads same DB)
+Browser → Dashboard (Next.js) → Supabase PostgreSQL
+                                       ↑
+                               twitch-miner-go bot
+                               (reads same DB)
 ```
 
 Changes saved in the dashboard take effect the next time the bot restarts or reloads its config (via PostgreSQL LISTEN/NOTIFY if the bot is configured for it).
@@ -72,9 +72,8 @@ Changes saved in the dashboard take effect the next time the bot restarts or rel
 | Layer | Technology |
 |---|---|
 | Framework | Next.js 16 (App Router, Server Actions) |
-| Auth | Neon Auth (`@neondatabase/auth`) — Better Auth under the hood |
-| Database | Neon PostgreSQL via `@neondatabase/serverless` |
-| ORM | Drizzle ORM + drizzle-kit |
+| Auth | Supabase Auth (`@supabase/supabase-js`, `@supabase/ssr`) |
+| Database | Supabase PostgreSQL via `@supabase/supabase-js` |
 | UI | shadcn/ui + Tailwind CSS 4 + @base-ui/react |
 | Forms | React Hook Form + Zod |
 | Analytics | Vercel Analytics |
@@ -84,11 +83,7 @@ Changes saved in the dashboard take effect the next time the bot restarts or rel
 ## Prerequisites
 
 - **Node.js ≥ 20** — check with `node --version`
-- **A Neon account** — [console.neon.tech](https://console.neon.tech) — free tier is sufficient
-- **`psql` in PATH** — only needed for the first-admin setup script. Install via:
-  - macOS: `brew install libpq && brew link --force libpq`
-  - Ubuntu/Debian: `sudo apt install postgresql-client`
-  - Windows: install [PostgreSQL](https://www.postgresql.org/download/windows/) and add its `bin/` to PATH
+- **A Supabase account** — [supabase.com](https://supabase.com) — free tier is sufficient
 
 ---
 
@@ -102,15 +97,10 @@ cd twitch-miner-go-dashboard
 npm install
 ```
 
-### 2. Create a Neon project
+### 2. Create a Supabase project
 
-1. Go to [console.neon.tech](https://console.neon.tech) and create a new project (or use an existing one that your bot already uses).
-2. In the project sidebar, open **Auth** and ensure it is provisioned. If not, click **Enable Auth**.
-3. Copy the **Base URL** from **Auth → Settings** — it looks like:
-   ```
-   https://<endpoint>.neonauth.<region>.aws.neon.tech/<dbname>/auth
-   ```
-4. Copy the **Connection string** from **Connection details** (use the pooled URL ending in `-pooler`).
+1. Go to [supabase.com](https://supabase.com) and create a new project.
+2. Go to **Settings → API** and copy the **Project URL**, **anon public** key, and **service_role** key.
 
 ### 3. Configure environment variables
 
@@ -118,44 +108,38 @@ npm install
 cp .env.example .env
 ```
 
-Edit `.env` and fill in the three values:
+Edit `.env` and fill in the values:
 
 ```env
-# Pooled connection string from Neon → Connection details
-DB_DSN=postgresql://user:password@ep-xxx-pooler.region.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+# Supabase API credentials (from Supabase Dashboard → Settings → API)
+NEXT_PUBLIC_SUPABASE_URL=https://[project-ref].supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_[your-key]
 
-# From Neon → Auth → Settings → Base URL
-NEON_AUTH_BASE_URL=https://ep-xxx.neonauth.region.aws.neon.tech/neondb/auth
-
-# Random 32-byte secret for signing session cookies
-NEON_AUTH_COOKIE_SECRET=<64-char hex string>
-```
-
-Generate `NEON_AUTH_COOKIE_SECRET`:
-
-```bash
-node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+# Supabase secret key (server-only, never exposed to client)
+SUPABASE_SECRET_KEY=eyJhbGciOiJIUzI1NiIs...
 ```
 
 > **Never commit `.env`** — it is git-ignored. Only `.env.example` is tracked.
 
 ### 4. Run database migrations
 
-This creates the `user_meta` and `user_accounts` tables in your Neon database. The bot's existing `accounts` table is left untouched.
+Open the **Supabase SQL Editor** (Dashboard → SQL Editor) and paste the contents of `supabase/migrations/00000000000000_init.sql`, then click **Run**. This creates:
 
-```bash
-npx drizzle-kit migrate
-```
+- `user_role` enum
+- `user_meta` table (dashboard user metadata)
+- `user_accounts` table (user ↔ bot account links)
+- `accounts` table (bot-owned, with trigger for LISTEN/NOTIFY)
+- Row Level Security policies for all tables
 
-Expected output: `✓ migrations applied successfully!`
+The bot's existing `accounts` table (if you already run twitch-miner-go) is **not** overwritten — the migration uses `CREATE TABLE IF NOT EXISTS` logic and matches the bot's schema exactly.
 
 ### 5. Create the first admin account
 
 Sign-up is disabled by default. To bootstrap the first admin:
 
-**Step 1** — Temporarily enable sign-up in the Neon Auth console:
-- Go to **Neon console → Auth → Settings → Email & password**
-- Enable **Allow sign-up**
+**Step 1** — Temporarily enable sign-up in the Supabase dashboard:
+- Go to **Authentication → Providers → Email**
+- Enable **Confirm email** (or disable it for testing)
 - Save
 
 **Step 2** — Run the setup script:
@@ -169,12 +153,12 @@ powershell -ExecutionPolicy Bypass -File scripts/create-admin.ps1
 ```
 
 The script will ask for your email, display name, and password. It then:
-1. Registers the account via Neon Auth
+1. Registers the account via Supabase Auth
 2. Inserts a `user_meta` row with `role = 'admin'`
 
-**Step 3** — Disable sign-up again in the Neon Auth console.
+**Step 3** — Disable sign-up again in the Supabase dashboard.
 
-> If you don't have `psql`, the script will fail at step 2. In that case, insert the row manually via the Neon console SQL editor:
+> If you don't have `psql`, insert the row manually via the Supabase SQL editor:
 > ```sql
 > INSERT INTO user_meta (user_id, must_change_password, role)
 > VALUES ('<your-user-id>', false, 'admin');
@@ -195,15 +179,17 @@ Open [http://localhost:3000](http://localhost:3000). You will be redirected to `
 
 1. Push the repository to GitHub.
 2. Import the project at [vercel.com/new](https://vercel.com/new).
-3. Add the three environment variables from your `.env` under **Project Settings → Environment Variables**:
-   - `DB_DSN`
-   - `NEON_AUTH_BASE_URL`
-   - `NEON_AUTH_COOKIE_SECRET`
+3. Add the environment variables from your `.env` under **Project Settings → Environment Variables**:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+   - `SUPABASE_SECRET_KEY`
+   - `BOT_URL` (optional)
+   - `BOT_API_KEY` (optional)
 4. Deploy.
-5. **Add the production URL as a trusted origin in Neon Auth:**
-   - Go to **Neon console → Auth → Settings → Trusted origins**
-   - Add `https://<your-app>.vercel.app`
-   - Without this step, Neon Auth will reject all requests from the production domain with `Invalid origin`.
+5. **Add the production URL as an authorized redirect URL in Supabase:**
+   - Go to **Supabase Dashboard → Authentication → URL Configuration**
+   - Add `https://<your-app>.vercel.app` to **Redirect URLs**
+   - Without this step, Supabase Auth will reject all requests from the production domain.
 
 ---
 
@@ -286,13 +272,13 @@ Use the dropdown to assign an unclaimed account to a user.
 
 ## Database schema
 
-The dashboard adds two tables to your Neon database. The bot's existing tables are never modified.
+The dashboard adds two tables to your Supabase database. The bot's existing tables are never modified.
 
 ```
 accounts          ← bot-owned, read/written by both bot and dashboard
 user_meta         ← dashboard-owned
 user_accounts     ← dashboard-owned (ownership junction)
-neon_auth.*       ← managed by Neon Auth automatically
+auth.users        ← managed by Supabase Auth automatically
 goose_db_version  ← bot migration tracking, do not touch
 ```
 
@@ -300,7 +286,7 @@ goose_db_version  ← bot migration tracking, do not touch
 
 | Column | Type | Description |
 |---|---|---|
-| `user_id` | `text` PK | Neon Auth user ID |
+| `user_id` | `text` PK | Supabase Auth user ID |
 | `must_change_password` | `boolean` | `true` on first login; cleared after user sets a new password |
 | `role` | `user_role` enum | `'user'` or `'admin'` |
 
@@ -341,28 +327,29 @@ src/
     (auth)/         Login and change-password pages
     (app)/          Dashboard and config editor (requires auth)
     admin/          Admin panel (requires admin role)
-    api/auth/       Neon Auth catch-all route handler
   components/
     config-editor/  Five-tab config editor and shared form components
     dashboard/      Account cards, modals, grid
     admin/          Users table, claim form, create user form
     settings/       Profile and password change form
     ui/             shadcn/ui primitives
-  db/
-    schema.ts       Drizzle table definitions (user_meta, user_accounts)
-    migrations/     Auto-generated SQL migration files
   lib/
-    auth.ts             Neon Auth instance and session helper
+    auth.ts             Supabase Auth helpers (signIn, signOut, createUser, etc.)
+    client.ts           Supabase browser client
+    server.ts           Supabase server client + admin client (service_role)
+    middleware.ts       Supabase middleware helper
     config-schema.ts    Zod schema mirroring Go AccountConfig
     config-transform.ts Pure functions: deepStrip, prepareConfigJson, enforceNonAdminConfig
     export-yaml.ts      Client-side YAML export utility
     utils.ts            cn(), generatePassword()
   proxy.ts          Route protection (Next.js 16 renamed middleware to proxy)
+supabase/
+  migrations/       SQL migration files (run via Supabase SQL Editor)
 scripts/
-  create-admin.sh    First-admin setup (Linux/macOS)
-  create-admin.ps1   First-admin setup (Windows)
+  create-admin.sh   First-admin setup (Linux/macOS)
+  create-admin.ps1  First-admin setup (Windows)
 .github/workflows/
-  ci.yml             Type check + tests on every push
+  ci.yml            Type check + tests on every push
 ```
 
 ---

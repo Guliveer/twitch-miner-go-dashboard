@@ -1,7 +1,5 @@
 import { getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createClient } from "@/lib/server";
 import { redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { Navbar } from "@/components/Navbar";
@@ -12,9 +10,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const meta = await db.query.userMeta.findFirst({
-    where: eq(userMeta.userId, session.user.id),
-  });
+  const supabase = await createClient();
+  const { data: meta } = await supabase
+    .from("user_meta")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .single();
   if (meta?.role !== "admin") redirect("/dashboard");
 
   return (

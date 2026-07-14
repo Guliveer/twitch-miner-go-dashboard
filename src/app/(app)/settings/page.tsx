@@ -1,9 +1,6 @@
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { neon } from "@neondatabase/serverless";
-import { db } from "@/db";
-import { userAccounts } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createClient } from "@/lib/server";
 import { SettingsForm } from "@/components/settings/SettingsForm";
 
 type BotAccountRow = {
@@ -17,32 +14,35 @@ export default async function SettingsPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const sql = neon(process.env.DB_DSN!);
+  const supabase = await createClient();
 
-  const [userRows, owned] = await Promise.all([
-    sql`SELECT name, email FROM neon_auth."user" WHERE id = ${session.user.id}`,
-    db.select({ botUsername: userAccounts.botUsername }).from(userAccounts).where(eq(userAccounts.userId, session.user.id)),
+  const [userResult, ownedResult] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase
+      .from("user_accounts")
+      .select("bot_username")
+      .eq("user_id", session.user.id),
   ]);
 
-  const user = userRows[0] as { name: string; email: string } | undefined;
+  const user = userResult.data.user;
+  const owned = ownedResult.data ?? [];
 
   let botAccounts: BotAccountRow[] = [];
-  if (owned.length > 0) {
-    const usernames = owned.map((r) => r.botUsername);
-    const rows = await sql`
-      SELECT username, enabled, updated_at, last_started_at
-      FROM accounts
-      WHERE username = ANY(${usernames}::text[])
-      ORDER BY username
-    `;
-    botAccounts = rows as BotAccountRow[];
+  if (owned && owned.length > 0) {
+    const usernames = owned.map((r: { bot_username: string }) => r.bot_username);
+    const { data: accounts } = await supabase
+      .from("accounts")
+      .select("username, enabled, updated_at, last_started_at")
+      .in("username", usernames)
+      .order("username");
+    botAccounts = (accounts as BotAccountRow[]) ?? [];
   }
 
   return (
     <div className="max-w-lg space-y-8">
       <h1 className="text-2xl font-bold">Settings</h1>
       <SettingsForm
-        name={user?.name ?? ""}
+        name={user?.user_metadata?.display_name ?? ""}
         email={user?.email ?? ""}
         botAccounts={botAccounts}
       />

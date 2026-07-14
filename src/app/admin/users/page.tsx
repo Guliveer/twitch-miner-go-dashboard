@@ -1,28 +1,27 @@
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { neon } from "@neondatabase/serverless";
+import { createAdminClient } from "@/lib/server";
 import { UsersTable } from "@/components/admin/UsersTable";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
 
 export default async function AdminUsersPage() {
-  const metas = await db.select().from(userMeta);
+  const supabase = await createAdminClient();
 
-  const sql = neon(process.env.DB_DSN!);
-  const authUsers = await sql`SELECT id, email, name FROM neon_auth."user"` as {
-    id: string;
-    email: string;
-    name: string | null;
-  }[];
+  const [metasResult, authUsersResult] = await Promise.all([
+    supabase.from("user_meta").select("*"),
+    supabase.auth.admin.listUsers(),
+  ]);
+
+  const metas = metasResult.data ?? [];
+  const authUsers = authUsersResult.data?.users ?? [];
 
   const users = metas.map((m) => {
-    const au = authUsers.find((u) => u.id === m.userId);
+    const au = authUsers.find((u) => u.id === m.user_id);
     return {
-      id: m.userId,
+      id: m.user_id,
       email: au?.email ?? "unknown",
-      name: au?.name ?? null,
-      mustChangePassword: m.mustChangePassword,
+      name: au?.user_metadata?.display_name ?? null,
+      mustChangePassword: m.must_change_password,
       role: m.role,
     };
   });

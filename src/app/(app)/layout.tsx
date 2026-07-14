@@ -3,16 +3,20 @@ import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createClient } from "@/lib/server";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await getSession();
-  const meta = session
-    ? await db.query.userMeta.findFirst({ where: eq(userMeta.userId, session.user.id) })
-    : null;
-  const isAdmin = meta?.role === "admin";
+  let isAdmin = false;
+  if (session) {
+    const supabase = await createClient();
+    const { data: meta } = await supabase
+      .from("user_meta")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single();
+    isAdmin = meta?.role === "admin";
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

@@ -1,41 +1,30 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
-import { neon } from "@neondatabase/serverless";
-
-const SESSION_TOKEN_COOKIE = "__Secure-neon-auth.session_token";
-const SESSION_DATA_COOKIE = "__Secure-neon-auth.local.session_data";
+import { createServerClient } from "@supabase/ssr";
 
 async function getSessionFromRequest(req: NextRequest) {
-  const hasSessionToken = req.cookies.has(SESSION_TOKEN_COOKIE);
-  if (!hasSessionToken) return null;
+  let supabaseResponse = NextResponse.next({ request: req });
 
-  const sessionDataCookieValue = req.cookies.get(SESSION_DATA_COOKIE)?.value;
-  if (sessionDataCookieValue) {
-    try {
-      const secret = new TextEncoder().encode(
-        process.env.NEON_AUTH_COOKIE_SECRET!
-      );
-      const { payload } = await jwtVerify(sessionDataCookieValue, secret, {
-        algorithms: ["HS256"],
-      });
-      const data = payload as { session?: unknown; user?: { id?: string } };
-      if (data.session && data.user?.id) {
-        return data as { session: unknown; user: { id: string } };
-      }
-    } catch {
-      // Cookie expired or invalid — fall through to upstream call
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return req.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({ request: req });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
     }
-  }
+  );
 
-  const sessionToken = req.cookies.get(SESSION_TOKEN_COOKIE)!.value;
-  const res = await fetch(`${process.env.NEON_AUTH_BASE_URL!}/get-session`, {
-    headers: { Cookie: `${SESSION_TOKEN_COOKIE}=${sessionToken}` },
-    signal: AbortSignal.timeout(3000),
-  });
-  if (!res.ok) return null;
-  const data = await res.json().catch(() => null);
-  if (!data?.session || !data?.user?.id) return null;
-  return data as { session: unknown; user: { id: string } };
+  const { data: { user } } = await supabase.auth.getUser();
+  return { user, supabaseResponse, supabase };
 }
 
 export async function proxy(req: NextRequest) {
@@ -47,10 +36,10 @@ export async function proxy(req: NextRequest) {
     pathname.startsWith("/login") || pathname.startsWith("/change-password");
   const isAdmin = pathname.startsWith("/admin");
 
-  const session = await getSessionFromRequest(req);
+  const { user, supabaseResponse, supabase } = await getSessionFromRequest(req);
 
-  if (!session) {
-    if (isAuthPage) return NextResponse.next();
+  if (!user) {
+    if (isAuthPage) return supabaseResponse;
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -58,16 +47,11 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  const sql = neon(process.env.DB_DSN!);
-  const rows = await sql`
-    SELECT must_change_password, role
-    FROM user_meta
-    WHERE user_id = ${session.user.id}
-    LIMIT 1
-  `;
-  const meta = rows[0] as
-    | { must_change_password: boolean; role: string }
-    | undefined;
+  const { data: meta } = await supabase
+    .from("user_meta")
+    .select("must_change_password, role")
+    .eq("user_id", user.id)
+    .single();
 
   if (meta?.must_change_password && pathname !== "/change-password") {
     return NextResponse.redirect(new URL("/change-password", req.url));
@@ -77,7 +61,7 @@ export async function proxy(req: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  return NextResponse.next();
+  return supabaseResponse;
 }
 
 export const config = {

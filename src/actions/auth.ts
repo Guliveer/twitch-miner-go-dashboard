@@ -1,20 +1,17 @@
 "use server";
 
-import { auth, getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { getSession, signIn as authSignIn, signOut as authSignOut, changePassword as authChangePassword, updateDisplayName as authUpdateDisplayName, createUser as authCreateUser, resetUserPassword as authResetUserPassword } from "@/lib/auth";
+import { createClient } from "@/lib/server";
 import { generatePassword } from "@/lib/utils";
 import { redirect } from "next/navigation";
 
 export async function signOut() {
-  await auth.signOut();
+  await authSignOut();
   redirect("/login");
 }
 
 export async function signIn(email: string, password: string) {
-  const result = await auth.signIn.email({ email, password });
-  if (result.error) throw new Error(result.error.message);
+  await authSignIn(email, password);
   redirect("/dashboard");
 }
 
@@ -22,16 +19,13 @@ export async function changePassword(currentPassword: string, newPassword: strin
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const result = await auth.changePassword({
-    currentPassword,
-    newPassword,
-  });
-  if (result.error) throw new Error(result.error.message);
+  await authChangePassword(currentPassword, newPassword);
 
-  await db
-    .update(userMeta)
-    .set({ mustChangePassword: false })
-    .where(eq(userMeta.userId, session.user.id));
+  const supabase = await createClient();
+  await supabase
+    .from("user_meta")
+    .update({ must_change_password: false })
+    .eq("user_id", session.user.id);
 
   redirect("/dashboard");
 }
@@ -40,43 +34,34 @@ export async function changePasswordWithVerification(currentPassword: string, ne
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const result = await auth.changePassword({
-    currentPassword,
-    newPassword,
-  });
-  if (result.error) throw new Error(result.error.message);
+  await authChangePassword(currentPassword, newPassword);
 }
 
 export async function updateDisplayName(name: string) {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const result = await auth.updateUser({ name });
-  if (result.error) throw new Error(result.error.message);
+  await authUpdateDisplayName(name);
 }
 
 export async function createUser(email: string, name: string): Promise<string> {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const meta = await db.query.userMeta.findFirst({
-    where: eq(userMeta.userId, session.user.id),
-  });
+  const supabase = await createClient();
+  const { data: meta } = await supabase
+    .from("user_meta")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .single();
   if (meta?.role !== "admin") throw new Error("Forbidden");
 
   const tempPassword = generatePassword();
+  const user = await authCreateUser(email, name, tempPassword);
 
-  const result = await auth.admin.createUser({
-    email,
-    name,
-    password: tempPassword,
-    role: "user",
-  });
-  if (result.error) throw new Error(result.error.message);
-
-  await db.insert(userMeta).values({
-    userId: result.data!.user.id,
-    mustChangePassword: true,
+  await supabase.from("user_meta").insert({
+    user_id: user.id,
+    must_change_password: true,
     role: "user",
   });
 
@@ -87,23 +72,21 @@ export async function resetUserPassword(targetUserId: string): Promise<string> {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
 
-  const meta = await db.query.userMeta.findFirst({
-    where: eq(userMeta.userId, session.user.id),
-  });
+  const supabase = await createClient();
+  const { data: meta } = await supabase
+    .from("user_meta")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .single();
   if (meta?.role !== "admin") throw new Error("Forbidden");
 
   const tempPassword = generatePassword();
+  await authResetUserPassword(targetUserId, tempPassword);
 
-  const result = await auth.admin.setUserPassword({
-    userId: targetUserId,
-    newPassword: tempPassword,
-  });
-  if (result.error) throw new Error(result.error.message);
-
-  await db
-    .update(userMeta)
-    .set({ mustChangePassword: true })
-    .where(eq(userMeta.userId, targetUserId));
+  await supabase
+    .from("user_meta")
+    .update({ must_change_password: true })
+    .eq("user_id", targetUserId);
 
   return tempPassword;
 }

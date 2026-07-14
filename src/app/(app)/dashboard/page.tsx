@@ -2,9 +2,7 @@ import { listBotAccounts } from "@/actions/accounts";
 import { AccountsGrid } from "@/components/dashboard/AccountsGrid";
 import { NewAccountModal } from "@/components/dashboard/NewAccountModal";
 import { getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { createClient } from "@/lib/server";
 import { Bot, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
@@ -14,10 +12,16 @@ export default async function DashboardPage() {
     getSession(),
   ]);
 
-  const meta = session
-    ? await db.query.userMeta.findFirst({ where: eq(userMeta.userId, session.user.id) })
-    : null;
-  const isAdmin = meta?.role === "admin";
+  let isAdmin = false;
+  if (session) {
+    const supabase = await createClient();
+    const { data: meta } = await supabase
+      .from("user_meta")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single();
+    isAdmin = meta?.role === "admin";
+  }
   const atLimit = !isAdmin && accounts.length >= 1;
 
   return (

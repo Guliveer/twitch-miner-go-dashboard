@@ -1,21 +1,22 @@
 import { listUnclaimedAccounts } from "@/actions/admin";
-import { db } from "@/db";
-import { userMeta } from "@/db/schema";
-import { neon } from "@neondatabase/serverless";
+import { createAdminClient } from "@/lib/server";
 import { ClaimAccountForm } from "@/components/admin/ClaimAccountForm";
 
 export default async function AdminAccountsPage() {
-  const sql = neon(process.env.DB_DSN!);
+  const supabase = await createAdminClient();
 
-  const [unclaimed, metas, authUsers] = await Promise.all([
+  const [unclaimed, metasResult, authUsersResult] = await Promise.all([
     listUnclaimedAccounts(),
-    db.select().from(userMeta),
-    sql`SELECT id, email, name FROM neon_auth."user"` as unknown as Promise<{ id: string; email: string; name: string }[]>,
+    supabase.from("user_meta").select("*"),
+    supabase.auth.admin.listUsers(),
   ]);
 
+  const metas = metasResult.data ?? [];
+  const authUsers = authUsersResult.data?.users ?? [];
+
   const users = metas.map((m) => {
-    const au = (authUsers as { id: string; email: string; name: string }[]).find((u) => u.id === m.userId);
-    return { id: m.userId, label: au?.name || au?.email || "unknown" };
+    const au = authUsers.find((u) => u.id === m.user_id);
+    return { id: m.user_id, label: au?.user_metadata?.display_name || au?.email || "unknown" };
   });
 
   return (

@@ -1,35 +1,50 @@
 "use server";
 
-import { db } from "@/db";
-import { userMeta, userAccounts } from "@/db/schema";
+import { createAdminClient } from "@/lib/server";
 import { getSession } from "@/lib/auth";
-import { eq } from "drizzle-orm";
-import { neon } from "@neondatabase/serverless";
 import { revalidatePath } from "next/cache";
 
 async function assertAdmin() {
   const session = await getSession();
   if (!session) throw new Error("Not authenticated");
-  const meta = await db.query.userMeta.findFirst({ where: eq(userMeta.userId, session.user.id) });
-  if (meta?.role !== "admin") throw new Error("Forbidden");
+  const supabase = await createAdminClient();
+  const { data } = await supabase
+    .from("user_meta")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .single();
+  if (data?.role !== "admin") throw new Error("Forbidden");
 }
 
 export async function listUnclaimedAccounts(): Promise<string[]> {
   await assertAdmin();
-  const claimed = await db.select({ botUsername: userAccounts.botUsername }).from(userAccounts);
-  const claimedNames = claimed.map((r) => r.botUsername);
-  const sql = neon(process.env.DB_DSN!);
+  const supabase = await createAdminClient();
 
-  const rows = claimedNames.length > 0
-    ? await sql`SELECT username FROM accounts WHERE username != ALL(${claimedNames}::text[])`
-    : await sql`SELECT username FROM accounts`;
+  const { data: claimed } = await supabase
+    .from("user_accounts")
+    .select("bot_username");
 
-  return (rows as { username: string }[]).map((r) => r.username);
+  const claimedNames = claimed?.map((r) => r.bot_username) ?? [];
+
+  const { data: accounts } = await supabase
+    .from("accounts")
+    .select("username");
+
+  if (!accounts) return [];
+
+  const unclaimed = accounts
+    .filter((a) => !claimedNames.includes(a.username))
+    .map((a) => a.username);
+
+  return unclaimed;
 }
 
 export async function claimAccountForUser(botUsername: string, targetUserId: string): Promise<void> {
   await assertAdmin();
-  await db.insert(userAccounts).values({ userId: targetUserId, botUsername }).onConflictDoNothing();
+  const supabase = await createAdminClient();
+  await supabase
+    .from("user_accounts")
+    .upsert({ user_id: targetUserId, bot_username: botUsername }, { onConflict: "user_id,bot_username" });
   revalidatePath("/admin/accounts");
   revalidatePath("/dashboard");
 }
