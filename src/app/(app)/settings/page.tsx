@@ -16,16 +16,22 @@ export default async function SettingsPage() {
 
   const supabase = await createClient();
 
-  const [userResult, ownedResult] = await Promise.all([
+  const [userResult, ownedResult, metaResult] = await Promise.all([
     supabase.auth.getUser(),
     supabase
       .from("user_accounts")
       .select("bot_username")
       .eq("user_id", session.user.id),
+    supabase
+      .from("user_meta")
+      .select("role")
+      .eq("user_id", session.user.id)
+      .single(),
   ]);
 
   const user = userResult.data.user;
   const owned = ownedResult.data ?? [];
+  const isAdmin = metaResult.data?.role === "admin";
 
   let botAccounts: BotAccountRow[] = [];
   if (owned && owned.length > 0) {
@@ -45,6 +51,7 @@ export default async function SettingsPage() {
         name={user?.user_metadata?.display_name ?? ""}
         email={user?.email ?? ""}
         botAccounts={botAccounts}
+        isAdmin={isAdmin}
       />
     </div>
   );

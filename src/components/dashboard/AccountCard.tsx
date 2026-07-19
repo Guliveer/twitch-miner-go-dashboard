@@ -15,6 +15,9 @@ type Props = {
   username: string;
   enabled: boolean;
   lastStartedAt: number | null;
+  ownerDisplayName?: string;
+  isAdmin?: boolean;
+  isOwnAccount?: boolean;
 };
 
 function relativeTime(epochSec: number): string {
@@ -30,10 +33,10 @@ function relativeTime(epochSec: number): string {
 function statusBadge(enabled: boolean, lastStartedAt: number | null) {
   if (!enabled) return <Badge variant="secondary">Disabled</Badge>;
   if (lastStartedAt === null) return <Badge variant="outline">Never started</Badge>;
-  return <Badge variant="default">Active</Badge>;
+  return <Badge variant="default" className="border-emerald-500/50 text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/15">Active</Badge>;
 }
 
-export function AccountCard({ username, enabled, lastStartedAt }: Props) {
+export function AccountCard({ username, enabled, lastStartedAt, ownerDisplayName, isAdmin, isOwnAccount }: Props) {
   const [isPending, startTransition] = useTransition();
   const [optimisticEnabled, setOptimisticEnabled] = useState(enabled);
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,9 +52,14 @@ export function AccountCard({ username, enabled, lastStartedAt }: Props) {
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-sm font-semibold tracking-tight">{username}</h3>
+          {ownerDisplayName && (
+            <span className="text-xs text-muted-foreground">
+              {ownerDisplayName}
+            </span>
+          )}
           {lastStartedAt !== null && (
             <span className="text-xs text-muted-foreground">
-              {relativeTime(lastStartedAt)}
+              {ownerDisplayName ? " · " : ""}{relativeTime(lastStartedAt)}
             </span>
           )}
         </div>
@@ -90,7 +98,9 @@ export function AccountCard({ username, enabled, lastStartedAt }: Props) {
             </Button>
           </Link>
         </div>
-        <DeleteAccountDialog username={username} />
+        {(!isAdmin || isOwnAccount) && (
+          <DeleteAccountDialog username={username} />
+        )}
       </div>
 
       {pendingCode && (

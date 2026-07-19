@@ -11,11 +11,14 @@ type Account = {
   username: string;
   enabled: boolean;
   last_started_at: number | null;
+  ownerDisplayName?: string;
+  isOwnAccount: boolean;
+  isUnclaimed: boolean;
 };
 
 type Filter = "all" | "enabled" | "disabled";
 
-export function AccountsGrid({ accounts, compact = false }: { accounts: Account[]; compact?: boolean }) {
+export function AccountsGrid({ accounts, compact = false, showOwnerSections = false, isAdmin = false }: { accounts: Account[]; compact?: boolean; showOwnerSections?: boolean; isAdmin?: boolean }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
@@ -31,6 +34,33 @@ export function AccountsGrid({ accounts, compact = false }: { accounts: Account[
       })
       .sort((a, b) => a.username.localeCompare(b.username));
   }, [accounts, search, filter]);
+
+  const myAccounts = showOwnerSections ? filtered.filter((a) => a.isOwnAccount) : [];
+  const otherAccounts = showOwnerSections ? filtered.filter((a) => !a.isOwnAccount && !a.isUnclaimed) : [];
+  const unclaimedAccounts = showOwnerSections ? filtered.filter((a) => a.isUnclaimed) : [];
+
+  const renderSection = (title: string, items: Account[]) => {
+    if (items.length === 0) return null;
+    return (
+      <div className="space-y-3">
+        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</p>
+        <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((a) => (
+            <div key={a.username} className="bg-background">
+              <AccountCard
+                username={a.username}
+                enabled={a.enabled}
+                lastStartedAt={a.last_started_at}
+                ownerDisplayName={a.ownerDisplayName}
+                isAdmin={isAdmin}
+                isOwnAccount={a.isOwnAccount}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -68,6 +98,12 @@ export function AccountsGrid({ accounts, compact = false }: { accounts: Account[
           <SearchX className="h-8 w-8 opacity-50" />
           <p className="text-sm">No accounts match your search.</p>
         </div>
+      ) : showOwnerSections ? (
+        <div className="space-y-8">
+          {renderSection("My accounts", myAccounts)}
+          {renderSection("Other users' accounts", otherAccounts)}
+          {renderSection("Unclaimed", unclaimedAccounts)}
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
           {filtered.map((a) => (
@@ -76,6 +112,9 @@ export function AccountsGrid({ accounts, compact = false }: { accounts: Account[
                 username={a.username}
                 enabled={a.enabled}
                 lastStartedAt={a.last_started_at}
+                ownerDisplayName={a.ownerDisplayName}
+                isAdmin={isAdmin}
+                isOwnAccount={a.isOwnAccount}
               />
             </div>
           ))}

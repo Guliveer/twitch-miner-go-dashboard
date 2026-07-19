@@ -53,9 +53,10 @@ type Props = {
   initialConfig: AccountConfigForm;
   isAdmin: boolean;
   allAccounts: string[];
+  ownerDisplayName?: string;
 };
 
-export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
+export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplayName }: Props) {
   const router = useRouter();
   const methods = useForm<AccountConfigForm>({
     defaultValues: initialConfig,
@@ -165,6 +166,11 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts }: Props) {
               </Select>
             ) : (
               <h1 className="text-2xl font-bold tracking-tight truncate">{initialConfig.username}</h1>
+            )}
+            {ownerDisplayName && (
+              <span className="text-xs text-muted-foreground">
+                {ownerDisplayName}
+              </span>
             )}
           </div>
 

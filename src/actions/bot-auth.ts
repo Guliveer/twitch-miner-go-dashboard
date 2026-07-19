@@ -7,6 +7,8 @@ type AuthStatusResponse = {
   expires_at?: number;
 };
 
+const warnedUnreachable = new Set<string>();
+
 /**
  * Checks the device code auth status for a given bot account username.
  * Returns the pending status or null if no flow is active / the bot is unreachable.
@@ -16,7 +18,10 @@ export async function checkBotAuthStatus(username: string): Promise<AuthStatusRe
   const apiKey = process.env.BOT_API_KEY;
 
   if (!baseUrl || !apiKey) {
-    console.warn("Bot API key not configured – BOT_URL, BOT_API_KEY");
+    if (!warnedUnreachable.has("__config__")) {
+      warnedUnreachable.add("__config__");
+      console.warn("Bot API key not configured – BOT_URL, BOT_API_KEY");
+    }
     return null;
   }
 
@@ -30,12 +35,17 @@ export async function checkBotAuthStatus(username: string): Promise<AuthStatusRe
 
     if (!res.ok) {
       console.warn(`Bot API responded with ${res.status} for user ${username}`);
+      warnedUnreachable.delete(username);
       return null;
     }
 
+    warnedUnreachable.delete(username);
     return (await res.json()) as AuthStatusResponse;
-  } catch (err) {
-    console.error(`Failed to check auth status for ${username}:`, err);
+  } catch {
+    if (!warnedUnreachable.has(username)) {
+      warnedUnreachable.add(username);
+      console.warn(`Bot unreachable for ${username}`);
+    }
     return null;
   }
 }

@@ -7,7 +7,7 @@ type Props = { params: Promise<{ username: string }> };
 export default async function ConfigEditorPage({ params }: Props) {
   const { username } = await params;
   try {
-    const [{ config, isAdmin }, accounts] = await Promise.all([
+    const [{ config, isAdmin, ownerDisplayName }, accounts] = await Promise.all([
       getBotAccount(username),
       listBotAccounts(),
     ]);
@@ -17,6 +17,7 @@ export default async function ConfigEditorPage({ params }: Props) {
         initialConfig={config}
         isAdmin={isAdmin}
         allAccounts={allAccounts}
+        ownerDisplayName={ownerDisplayName}
       />
     );
   } catch {

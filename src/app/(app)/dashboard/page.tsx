@@ -32,7 +32,7 @@ export default async function DashboardPage() {
             Bot accounts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage your Twitch bot configurations
+            {isAdmin ? "Manage all bot configurations" : "Manage your Twitch bot configurations"}
           </p>
         </div>
         {!atLimit && <NewAccountModal />}
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
           </div>
         </div>
       ) : isAdmin ? (
-        <AccountsGrid accounts={accounts} />
+        <AccountsGrid accounts={accounts} showOwnerSections isAdmin />
       ) : (
         <div className="space-y-4">
           <AccountsGrid accounts={accounts} compact />

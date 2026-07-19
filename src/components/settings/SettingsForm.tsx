@@ -47,7 +47,7 @@ const passwordSchema = z
 type NameFields = z.infer<typeof nameSchema>;
 type PasswordFields = z.infer<typeof passwordSchema>;
 
-export function SettingsForm({ name, email, botAccounts = [] }: { name: string; email: string; botAccounts?: BotAccountRow[] }) {
+export function SettingsForm({ name, email, botAccounts = [], isAdmin }: { name: string; email: string; botAccounts?: BotAccountRow[]; isAdmin?: boolean }) {
   const [isPendingName, startNameTransition] = useTransition();
   const [isPendingPwd, startPwdTransition] = useTransition();
 
@@ -96,40 +96,43 @@ export function SettingsForm({ name, email, botAccounts = [] }: { name: string; 
           {initials}
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-medium truncate">{name || "—"}</p>
-          <p className="text-xs text-muted-foreground truncate">{email}</p>
+          <p className="text-sm font-medium truncate">{email}</p>
         </div>
       </div>
 
-      <div className="relative flex items-center gap-3">
-        <Separator className="flex-1" />
-        <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Profile</span>
-        <Separator className="flex-1" />
-      </div>
+      {!isAdmin && (
+        <>
+          <div className="relative flex items-center gap-3">
+            <Separator className="flex-1" />
+            <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Profile</span>
+            <Separator className="flex-1" />
+          </div>
 
-      <div className="border border-border">
-        <div className="border-b border-border p-5">
-          <h3 className="text-xs font-semibold uppercase tracking-wider">Display name</h3>
-        </div>
-        <div className="p-5">
-          <form onSubmit={nameForm.handleSubmit(onSaveName)} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input value={email} disabled />
+          <div className="border border-border">
+            <div className="border-b border-border p-5">
+              <h3 className="text-xs font-semibold uppercase tracking-wider">Display name</h3>
             </div>
-            <div className="space-y-1.5">
-              <Label>Display name</Label>
-              <Input {...nameForm.register("name")} />
-              {nameForm.formState.errors.name && (
-                <p className="text-sm text-destructive">{nameForm.formState.errors.name.message}</p>
-              )}
+            <div className="p-5">
+              <form onSubmit={nameForm.handleSubmit(onSaveName)} className="space-y-4">
+                <div className="space-y-1.5">
+                  <Label>Email</Label>
+                  <Input value={email} disabled />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Display name</Label>
+                  <Input {...nameForm.register("name")} />
+                  {nameForm.formState.errors.name && (
+                    <p className="text-sm text-destructive">{nameForm.formState.errors.name.message}</p>
+                  )}
+                </div>
+                <Button type="submit" disabled={isPendingName}>
+                  {isPendingName ? "Saving…" : "Save"}
+                </Button>
+              </form>
             </div>
-            <Button type="submit" disabled={isPendingName}>
-              {isPendingName ? "Saving…" : "Save"}
-            </Button>
-          </form>
-        </div>
-      </div>
+          </div>
+        </>
+      )}
 
       <div className="relative flex items-center gap-3">
         <Separator className="flex-1" />
