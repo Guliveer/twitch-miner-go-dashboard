@@ -22,7 +22,7 @@ export async function Footer() {
           <span
             className={
               bot.connected
-                ? "text-emerald-600 dark:text-emerald-400"
+                ? "text-success"
                 : "text-muted-foreground"
             }
             title={bot.connected ? "Bot API reachable" : "Bot API not configured or unreachable"}
@@ -31,7 +31,7 @@ export async function Footer() {
           </span>
         </>
       )}
-      {" · © 2026"}
+      {" · © " + new Date().getFullYear()}
     </footer>
   );
 }

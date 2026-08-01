@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -104,7 +104,7 @@ export function SettingsForm({ name, email, botAccounts = [], isAdmin }: { name:
         <>
           <div className="relative flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Profile</span>
+            <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wider">Profile</span>
             <Separator className="flex-1" />
           </div>
 
@@ -136,7 +136,7 @@ export function SettingsForm({ name, email, botAccounts = [], isAdmin }: { name:
 
       <div className="relative flex items-center gap-3">
         <Separator className="flex-1" />
-        <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Security</span>
+        <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wider">Security</span>
         <Separator className="flex-1" />
       </div>
 
@@ -179,7 +179,7 @@ export function SettingsForm({ name, email, botAccounts = [], isAdmin }: { name:
         <>
           <div className="relative flex items-center gap-3">
             <Separator className="flex-1" />
-            <span className="shrink-0 text-[10px] text-muted-foreground uppercase tracking-wider">Bot accounts</span>
+            <span className="shrink-0 text-xs text-muted-foreground uppercase tracking-wider">Bot accounts</span>
             <Separator className="flex-1" />
           </div>
 

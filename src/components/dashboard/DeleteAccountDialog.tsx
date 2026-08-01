@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -13,12 +13,14 @@ import {
 import { deleteBotAccount } from "@/actions/accounts";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 export function DeleteAccountDialog({ username, disabled }: { username: string; disabled?: boolean }) {
   const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button variant="destructive" size="sm" disabled={disabled} />}>
         <Trash2 className="h-3.5 w-3.5" />
         Delete
@@ -36,7 +38,13 @@ export function DeleteAccountDialog({ username, disabled }: { username: string; 
             variant="destructive"
             disabled={isPending}
             onClick={() => startTransition(async () => {
-              try { await deleteBotAccount(username); } catch (e) { if (!isRedirectError(e)) throw e; }
+              try {
+                await deleteBotAccount(username);
+                setOpen(false);
+              } catch (e) {
+                if (isRedirectError(e)) return;
+                toast.error(e instanceof Error ? e.message : "Failed to delete account");
+              }
             })}
           >
             {isPending ? "Deleting…" : "Delete"}

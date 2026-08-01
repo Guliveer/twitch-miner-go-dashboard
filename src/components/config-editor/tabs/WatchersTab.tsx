@@ -75,7 +75,7 @@ export function WatchersTab() {
           {catFields.map((field, i) => (
             <div key={field.id} className="flex gap-2 items-end">
               <div className="space-y-1 min-w-0">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Category</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Category</span>
                 <Input
                   {...register(`category_watcher.categories.${i}.slug`)}
                   placeholder="rust / just-chatting / or paste URL"
@@ -89,7 +89,7 @@ export function WatchersTab() {
                 />
               </div>
               <div className="space-y-1">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Drops only</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">Drops only</span>
                 <Select
                   value={
                     watch(`category_watcher.categories.${i}.drops_only`) ===
@@ -117,8 +117,8 @@ export function WatchersTab() {
                         Inherit
                       </span>
                     </SelectItem>
-                    <SelectItem value="true">✓ On</SelectItem>
-                    <SelectItem value="false">✗ Off</SelectItem>
+                    <SelectItem value="true">On</SelectItem>
+                    <SelectItem value="false">Off</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -127,6 +127,7 @@ export function WatchersTab() {
                 variant="ghost"
                 size="sm"
                 className="mb-px"
+                aria-label={`Remove category ${i + 1}`}
                 onClick={() => removeCat(i)}
               >
                 <X className="h-4 w-4" />
@@ -183,6 +184,7 @@ export function WatchersTab() {
                 type="button"
                 variant="ghost"
                 size="sm"
+                aria-label={`Remove team ${i + 1}`}
                 onClick={() => removeTeam(i)}
               >
                 <X className="h-4 w-4" />

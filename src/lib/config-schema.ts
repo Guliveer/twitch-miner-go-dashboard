@@ -1,13 +1,24 @@
 import { z } from "zod";
 
-const PRIORITIES = ["STREAK", "DROPS", "ORDER", "SUBSCRIBED", "POINTS_ASCENDING", "POINTS_DESCENDING"] as const;
-const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
-const STRATEGIES = ["SMART", "HIGH_ODDS", "MOST_VOTED", "SMART_MONEY", "PERCENTAGE", "NUMBER_1", "NUMBER_2", "NUMBER_3", "NUMBER_4", "NUMBER_5", "NUMBER_6", "NUMBER_7", "NUMBER_8"] as const;
-const DELAY_MODES = ["FROM_START", "FROM_END", "PERCENTAGE"] as const;
-const OUTCOME_KEYS = ["percentage_users", "odds_percentage", "odds", "top_points", "total_users", "total_points"] as const;
-const CONDITIONS = ["GT", "LT", "GTE", "LTE"] as const;
-const FOLLOWERS_ORDERS = ["ASC", "DESC"] as const;
-const WEBHOOK_METHODS = ["GET", "POST"] as const;
+// Enum values mirror the bot's internal/model package. Keep in sync with
+// twitch-miner-go when the bot adds or renames values.
+export const PRIORITIES = [
+  "STREAK",
+  "DROPS",
+  "ORDER",
+  "SUBSCRIBED",
+  "POINTS_ASCENDING",
+  "POINTS_DESCENDING",
+  "ENDING_SOONEST",
+  "LOW_AVAILABILITY_FIRST",
+] as const;
+export const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
+export const STRATEGIES = ["SMART", "HIGH_ODDS", "MOST_VOTED", "SMART_MONEY", "PERCENTAGE", "NUMBER_1", "NUMBER_2", "NUMBER_3", "NUMBER_4", "NUMBER_5", "NUMBER_6", "NUMBER_7", "NUMBER_8"] as const;
+export const DELAY_MODES = ["FROM_START", "FROM_END", "PERCENTAGE"] as const;
+export const OUTCOME_KEYS = ["percentage_users", "odds_percentage", "odds", "top_points", "total_users", "total_points", "decision_users", "decision_points"] as const;
+export const CONDITIONS = ["GT", "LT", "GTE", "LTE"] as const;
+export const FOLLOWERS_ORDERS = ["ASC", "DESC"] as const;
+export const WEBHOOK_METHODS = ["GET", "POST"] as const;
 
 export const ALL_EVENTS = [
   "STREAMER_ONLINE",
@@ -35,6 +46,7 @@ export const ALL_EVENTS = [
   "MINER_STOPPED",
   "MINER_CRASHED",
   "ACCOUNT_CONFIG_RELOADED",
+  "DROP_MILESTONE",
   "TEST",
 ] as const;
 
@@ -159,9 +171,15 @@ export const accountConfigSchema = z.object({
     claim_drops_startup: z.boolean(),
     enable_analytics: z.boolean(),
   }),
-  max_watch_streams: z.number().int().min(1).optional(),
+  max_watch_streams: z.number().int().min(0).optional(),
   priority: z.array(z.enum(PRIORITIES)),
-  proxy: z.string().optional(),
+  proxy: z
+    .string()
+    .refine(
+      (v) => v === "" || /^(http|https|socks5):\/\/\S+/.test(v),
+      "Proxy must start with http://, https://, or socks5:// (e.g. socks5://127.0.0.1:1080)",
+    )
+    .optional(),
   category_watcher: z.object({
     enabled: z.boolean(),
     poll_interval: durationString.optional(),

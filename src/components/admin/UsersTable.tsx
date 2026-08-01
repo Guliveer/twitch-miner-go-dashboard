@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { resetUserPassword } from "@/actions/auth";
 import { KeyRound, Copy } from "lucide-react";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,7 @@ export function UsersTable({ users }: { users: User[] }) {
         const pwd = await resetUserPassword(userId);
         setTempPassword(pwd);
       } catch (e) {
-        alert(e instanceof Error ? e.message : "Reset failed");
+        toast.error(e instanceof Error ? e.message : "Reset failed");
       } finally {
         setPendingUserId(null);
       }

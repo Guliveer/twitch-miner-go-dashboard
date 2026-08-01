@@ -33,7 +33,7 @@ export function TagInput({ value, onChange, placeholder = "Add item…" }: Props
       {value.map((item) => (
         <Badge key={item} variant="secondary" className="gap-1">
           {item}
-          <button type="button" onClick={() => remove(item)}>
+          <button type="button" aria-label={`Remove ${item}`} onClick={() => remove(item)}>
             <X className="h-3 w-3" />
           </button>
         </Badge>

@@ -12,17 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TagInput } from "../shared/TagInput";
+import { PriorityInput } from "../shared/PriorityInput";
 import { numRegister } from "../shared/form-helpers";
-
-const PRIORITIES = [
-  "STREAK",
-  "DROPS",
-  "ORDER",
-  "SUBSCRIBED",
-  "POINTS_ASCENDING",
-  "POINTS_DESCENDING",
-];
 
 export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
   const {
@@ -45,14 +36,17 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
         <div className="space-y-1.5">
           <Label>
             Max watch streams
-            {!isAdmin && <span className="ml-1.5 text-[10px] text-muted-foreground">(max 10)</span>}
+            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(max 10)</span>}
           </Label>
           <Input
             type="number"
-            min={1}
+            min={0}
             {...(!isAdmin ? { max: 10 } : {})}
             {...register("max_watch_streams", numRegister())}
           />
+          <p className="text-xs text-muted-foreground">
+            0 means unlimited.
+          </p>
         </div>
         <div className={`space-y-1.5 ${!isAdmin ? "opacity-50 pointer-events-none" : ""}`}>
           <Label>Proxy (optional)</Label>
@@ -61,20 +55,19 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
             disabled={!isAdmin}
             {...register("proxy")}
           />
+          <p className="text-xs text-muted-foreground">
+            http://, https://, or socks5:// — e.g. socks5://127.0.0.1:1080.
+          </p>
           {!isAdmin && <p className="text-xs text-muted-foreground">(admin only)</p>}
         </div>
       </div>
 
       <div className="space-y-1.5">
         <Label>Watch priority (ordered)</Label>
-        <TagInput
+        <PriorityInput
           value={watch("priority")}
           onChange={(v) => setValue("priority", v as AccountConfigForm["priority"])}
-          placeholder="Add priority…"
         />
-        <p className="text-xs text-muted-foreground">
-          Valid values: {PRIORITIES.join(", ")}
-        </p>
       </div>
 
       <div className="border border-border p-5 space-y-4">
@@ -94,7 +87,7 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
           />
           <Label className="text-xs">
             Enable analytics
-            {!isAdmin && <span className="ml-1.5 text-[10px] text-muted-foreground">(admin only)</span>}
+            {!isAdmin && <span className="ml-1.5 text-xs text-muted-foreground">(admin only)</span>}
           </Label>
         </div>
       </div>

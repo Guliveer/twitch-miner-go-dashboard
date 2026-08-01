@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
 import {
   Select,
   SelectContent,
@@ -19,7 +20,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Separator } from "@/components/ui/separator";
+import { TagInput } from "../shared/TagInput";
+import { BetFields } from "../shared/BetFields";
 
 const FORCED_STREAMER = "guliveer_";
 const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
@@ -86,6 +88,36 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
+      <Separator />
+
+      {/* Blacklists */}
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label className="text-xs">Streamer blacklist</Label>
+          <TagInput
+            value={watch("blacklist") ?? []}
+            onChange={(v) => setValue("blacklist", v)}
+            placeholder="Add streamer…"
+          />
+          <p className="text-xs text-muted-foreground">
+            Streamers that are never joined, even if watched or raided.
+          </p>
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Category blacklist</Label>
+          <TagInput
+            value={watch("category_blacklist") ?? []}
+            onChange={(v) => setValue("category_blacklist", v)}
+            placeholder="Add category…"
+          />
+          <p className="text-xs text-muted-foreground">
+            Categories that are never watched, e.g. just-chatting.
+          </p>
+        </div>
+      </div>
+
+      <Separator />
+
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
           {visibleFields.length} streamer{visibleFields.length !== 1 ? "s" : ""}
@@ -146,8 +178,8 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                         <SelectItem value="">
                           <span className="text-muted-foreground italic">Inherit from defaults</span>
                         </SelectItem>
-                        <SelectItem value="true">✓ On</SelectItem>
-                        <SelectItem value="false">✗ Off</SelectItem>
+                        <SelectItem value="true">On</SelectItem>
+                        <SelectItem value="false">Off</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -179,6 +211,30 @@ export function StreamersTab({ isAdmin }: { isAdmin: boolean }) {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="border-t border-border pt-4">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs">Bet settings override</Label>
+                  <Switch
+                    checked={watch(`streamers.${i}.settings.bet`) !== undefined}
+                    onCheckedChange={(v) =>
+                      setValue(
+                        `streamers.${i}.settings.bet`,
+                        v ? {} : undefined,
+                      )
+                    }
+                    aria-label="Override bet settings"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  When off, this streamer inherits the default bet settings.
+                </p>
+                {watch(`streamers.${i}.settings.bet`) !== undefined && (
+                  <div className="mt-4">
+                    <BetFields path={`streamers.${i}.settings.bet`} />
+                  </div>
+                )}
               </div>
 
               <Button

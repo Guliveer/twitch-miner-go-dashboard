@@ -11,6 +11,7 @@ import {
 } from "@/lib/config-transform";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 async function isAdmin(userId: string): Promise<boolean> {
   const supabase = await createClient();
@@ -200,7 +201,17 @@ export async function updateBotAccount(username: string, config: AccountConfigFo
 
   const admin = await isAdmin(session.user.id);
   const sanitised = admin ? config : enforceNonAdminConfig(config);
-  const validated = accountConfigSchema.parse(sanitised);
+  let validated: AccountConfigForm;
+  try {
+    validated = accountConfigSchema.parse(sanitised);
+  } catch (e) {
+    if (e instanceof z.ZodError) {
+      throw new Error(
+        e.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("; "),
+      );
+    }
+    throw e;
+  }
   validated.username = username;
   const configJson = prepareConfigJson(validated);
   const enabled = validated.enabled ?? true;

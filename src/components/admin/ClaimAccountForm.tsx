@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { claimAccountForUser } from "@/actions/admin";
+import { toast } from "sonner";
 
 type Props = {
   unclaimedAccounts: string[];
@@ -22,19 +23,17 @@ export function ClaimAccountForm({ unclaimedAccounts, users }: Props) {
   const [userId, setUserId] = useState(users[0]?.id ?? "");
   const selectedUserLabel = users.find((u) => u.id === userId)?.label ?? userId;
   const [isPending, startTransition] = useTransition();
-  const [message, setMessage] = useState("");
 
   if (unclaimedAccounts.length === 0) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage("");
     startTransition(async () => {
       try {
         await claimAccountForUser(botUsername, userId);
-        setMessage(`Assigned "${botUsername}" to ${users.find((u) => u.id === userId)?.label}.`);
+        toast.success(`Assigned "${botUsername}" to ${users.find((u) => u.id === userId)?.label}.`);
       } catch (err) {
-        setMessage(err instanceof Error ? err.message : "Failed");
+        toast.error(err instanceof Error ? err.message : "Failed");
       }
     });
   };
@@ -74,7 +73,6 @@ export function ClaimAccountForm({ unclaimedAccounts, users }: Props) {
           {isPending ? "Assigning…" : "Assign"}
         </Button>
       </form>
-      {message && <p className="text-xs text-muted-foreground">{message}</p>}
     </div>
   );
 }

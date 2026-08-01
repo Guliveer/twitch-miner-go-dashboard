@@ -2,21 +2,11 @@ import type { ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { getSession } from "@/lib/auth";
-import { createClient } from "@/lib/server";
+import { getUserRole } from "@/lib/auth";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const session = await getSession();
-  let isAdmin = false;
-  if (session) {
-    const supabase = await createClient();
-    const { data: meta } = await supabase
-      .from("user_meta")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .single();
-    isAdmin = meta?.role === "admin";
-  }
+  const role = await getUserRole();
+  const isAdmin = role === "admin";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">

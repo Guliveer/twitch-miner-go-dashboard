@@ -33,7 +33,7 @@ function relativeTime(epochSec: number): string {
 function statusBadge(enabled: boolean, lastStartedAt: number | null) {
   if (!enabled) return <Badge variant="secondary">Disabled</Badge>;
   if (lastStartedAt === null) return <Badge variant="outline">Never started</Badge>;
-  return <Badge variant="default" className="border-emerald-500/50 text-emerald-600 bg-emerald-500/10 dark:text-emerald-400 dark:bg-emerald-500/15">Active</Badge>;
+  return <Badge variant="default" className="border-success/50 text-success bg-success/10 dark:bg-success/15">Active</Badge>;
 }
 
 export function AccountCard({ username, enabled, lastStartedAt, ownerDisplayName, isAdmin, isOwnAccount }: Props) {

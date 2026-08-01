@@ -1,5 +1,6 @@
 import { createClient, createAdminClient } from "@/lib/server";
 import type { Session, User } from "@supabase/supabase-js";
+import { cache } from "react";
 
 export type { Session, User };
 
@@ -9,6 +10,19 @@ export async function getSession(): Promise<{ session: Session; user: User } | n
   if (!session) return null;
   return { session, user: session.user };
 }
+
+/** Memoized per request via React cache() so shared layouts issue one query. */
+export const getUserRole = cache(async (): Promise<"admin" | "user" | null> => {
+  const session = await getSession();
+  if (!session) return null;
+  const supabase = await createClient();
+  const { data: meta } = await supabase
+    .from("user_meta")
+    .select("role")
+    .eq("user_id", session.user.id)
+    .single();
+  return meta?.role === "admin" ? "admin" : "user";
+});
 
 export async function signIn(email: string, password: string) {
   const supabase = await createClient();

@@ -35,11 +35,13 @@ export function EventMultiSelect({ value, onChange }: Props) {
         )}
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-2 max-h-72 overflow-y-auto">
+      <PopoverContent className="w-80 p-2 max-h-72 overflow-y-auto" role="listbox" aria-label="Events">
         {ALL_EVENTS.map((event) => (
           <button
             key={event}
             type="button"
+            role="option"
+            aria-selected={value.includes(event)}
             className={cn(
               "flex items-center gap-2 w-full px-2 py-1.5 text-sm hover:bg-muted transition-colors",
               value.includes(event) && "font-medium"

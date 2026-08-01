@@ -1,7 +1,7 @@
 "use client";
 
 import { useForm, FormProvider } from "react-hook-form";
-import { z, type ZodTypeAny } from "zod";
+import { type ZodTypeAny } from "zod";
 import {
   type AccountConfigForm,
   generalTabSchema,
@@ -43,7 +43,8 @@ import { StreamersTab } from "./tabs/StreamersTab";
 import { BettingTab } from "./tabs/BettingTab";
 import { NotificationsTab } from "./tabs/NotificationsTab";
 import { WatchersTab } from "./tabs/WatchersTab";
-import { useState, useTransition } from "react";
+import { ConfigWarningsBanner } from "./shared/ConfigWarningsBanner";
+import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { exportConfigAsYaml } from "@/lib/export-yaml";
 import { useDeviceCode } from "@/hooks/useDeviceCode";
@@ -65,8 +66,6 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
   const [isPending, startTransition] = useTransition();
   const isDirty = methods.formState.isDirty;
 
-  const [activeTab, setActiveTab] = useState("general");
-
   const TAB_SCHEMAS: Record<string, ZodTypeAny> = {
     general: generalTabSchema,
     streamers: streamersTabSchema,
@@ -81,22 +80,50 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
   // Save confirmation dialog
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
-  // Account switch confirmation dialog
-  const [switchTarget, setSwitchTarget] = useState<string | null>(null);
+  // Navigation confirmation when unsaved changes exist (account switch, links, unload)
+  const [pendingNav, setPendingNav] = useState<{ path: string; label: string } | null>(null);
+
+  useEffect(() => {
+    if (!isDirty) return;
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+      const anchor = (e.target as Element | null)?.closest?.("a[href]");
+      if (!anchor) return;
+      const href = anchor.getAttribute("href");
+      if (!href || !href.startsWith("/")) return;
+      if (anchor.getAttribute("target") === "_blank") return;
+      e.preventDefault();
+      setPendingNav({ path: href, label: href });
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("click", handleClick, true);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("click", handleClick, true);
+    };
+  }, [isDirty]);
 
   const handleSaveConfirmed = () => {
     setSaveDialogOpen(false);
     const data = methods.getValues();
-    const schema = TAB_SCHEMAS[activeTab];
-    if (schema) {
+    const issues: string[] = [];
+    for (const [tab, schema] of Object.entries(TAB_SCHEMAS)) {
       const result = schema.safeParse(data);
       if (!result.success) {
-        const messages = result.error.issues.map(
-          (i) => `${i.path.join(".")}: ${i.message}`,
-        );
-        toast.error(`Validation errors on ${activeTab} tab:\n${messages.join("\n")}`);
-        return;
+        for (const issue of result.error.issues) {
+          issues.push(`[${tab}] ${issue.path.join(".") || "(root)"}: ${issue.message}`);
+        }
       }
+    }
+    if (issues.length > 0) {
+      toast.error(`Validation errors:\n${issues.join("\n")}`);
+      return;
     }
     methods.handleSubmit((validated) => {
       const cleaned = {
@@ -107,7 +134,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
       startTransition(async () => {
         try {
           await updateBotAccount(cleaned.username, cleaned);
-          toast.success("Configuration saved" + (removedCount > 0 ? ` (removed ${removedCount} unnamed streamer${removedCount > 1 ? "s" : ""})"` : ""));
+          toast.success("Configuration saved" + (removedCount > 0 ? ` (removed ${removedCount} unnamed streamer${removedCount > 1 ? "s" : ""})` : ""));
           methods.reset(cleaned);
         } catch (e) {
           toast.error(e instanceof Error ? e.message : "Save failed");
@@ -116,16 +143,17 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
     })();
   };
 
-  const handleSwitchConfirmed = () => {
-    if (!switchTarget) return;
-    setSwitchTarget(null);
-    router.push(`/dashboard/${switchTarget}`);
+  const handleNavConfirmed = () => {
+    if (!pendingNav) return;
+    const path = pendingNav.path;
+    setPendingNav(null);
+    router.push(path);
   };
 
   const handleAccountChange = (value: string | null) => {
     if (!value || value === initialConfig.username) return;
     if (isDirty) {
-      setSwitchTarget(value);
+      setPendingNav({ path: `/dashboard/${value}`, label: value });
     } else {
       router.push(`/dashboard/${value}`);
     }
@@ -203,7 +231,9 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
           </div>
         </div>
 
-        <Tabs defaultValue="general" onValueChange={setActiveTab}>
+        <ConfigWarningsBanner />
+
+        <Tabs defaultValue="general">
           <TabsList className="w-full border-b border-border">
             <TabsTrigger value="general">
               <SlidersHorizontal className="h-4 w-4" />
@@ -261,25 +291,25 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
         </DialogContent>
       </Dialog>
 
-      {/* Unsaved changes warning when switching accounts */}
+      {/* Unsaved changes warning when navigating away */}
       <Dialog
-        open={!!switchTarget}
-        onOpenChange={(open) => { if (!open) setSwitchTarget(null); }}
+        open={!!pendingNav}
+        onOpenChange={(open) => { if (!open) setPendingNav(null); }}
       >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Unsaved changes</DialogTitle>
             <DialogDescription>
               You have unsaved changes to <strong>{initialConfig.username}</strong>.
-              Switching to <strong>{switchTarget}</strong> will discard them.
+              Going to <strong>{pendingNav?.label}</strong> will discard them.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-2 pt-2">
-            <Button variant="outline" onClick={() => setSwitchTarget(null)}>
+            <Button variant="outline" onClick={() => setPendingNav(null)}>
               Stay here
             </Button>
-            <Button variant="destructive" onClick={handleSwitchConfirmed}>
-              Discard and switch
+            <Button variant="destructive" onClick={handleNavConfirmed}>
+              Discard and continue
             </Button>
           </div>
         </DialogContent>

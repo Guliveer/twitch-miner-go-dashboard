@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,8 +21,15 @@ type Props = {
 
 export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
   const [copied, setCopied] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
 
-  const isExpired = code.expiresAt > 0 && Date.now() / 1000 > code.expiresAt;
+  useEffect(() => {
+    if (!open) return;
+    const id = setInterval(() => {
+      setIsExpired(code.expiresAt > 0 && Date.now() / 1000 > code.expiresAt);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [open, code.expiresAt]);
 
   const handleCopy = async () => {
     try {

@@ -1,27 +1,17 @@
 import { listBotAccounts } from "@/actions/accounts";
 import { AccountsGrid } from "@/components/dashboard/AccountsGrid";
 import { NewAccountModal } from "@/components/dashboard/NewAccountModal";
-import { getSession } from "@/lib/auth";
-import { createClient } from "@/lib/server";
+import { getUserRole } from "@/lib/auth";
 import { Bot, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
 export default async function DashboardPage() {
-  const [accounts, session] = await Promise.all([
+  const [accounts, role] = await Promise.all([
     listBotAccounts(),
-    getSession(),
+    getUserRole(),
   ]);
 
-  let isAdmin = false;
-  if (session) {
-    const supabase = await createClient();
-    const { data: meta } = await supabase
-      .from("user_meta")
-      .select("role")
-      .eq("user_id", session.user.id)
-      .single();
-    isAdmin = meta?.role === "admin";
-  }
+  const isAdmin = role === "admin";
   const atLimit = !isAdmin && accounts.length >= 1;
 
   return (
@@ -58,7 +48,7 @@ export default async function DashboardPage() {
             <div className="border border-dashed border-border p-4 flex items-start gap-3 text-sm text-muted-foreground">
               <ExternalLink className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
-                You've reached the 1-account limit for shared users.{" "}
+                You&apos;ve reached the 1-account limit for shared users.{" "}
                 <Link
                   href="https://github.com/Guliveer/twitch-miner-go"
                   target="_blank"

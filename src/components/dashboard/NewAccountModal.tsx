@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -55,6 +56,10 @@ export function NewAccountModal() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add bot account</DialogTitle>
+          <DialogDescription>
+            Create a new bot account. The account is added to the database and
+            linked to your user.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-1.5">
