@@ -393,6 +393,36 @@ describe("prepareConfigJson", () => {
     expect(telegram.events).toEqual(["DROP_CLAIM", "MINER_STARTED"]);
     expect((telegram.batch as Record<string, unknown>).interval).toBe("4h0m0s");
   });
+
+  it("round-trips watch streak and preferred streamer settings", () => {
+    const config: AccountConfigForm = {
+      ...DEFAULT_CONFIG,
+      username: "guliveer_",
+      max_watch_streams: 2,
+      streak_watch_streams: 2,
+      watch_streak_minutes: 10,
+      preferred_streamers: ["xqc", "summit1g"],
+      priority: ["PREFERRED", "DROPS", "ORDER"],
+      streamers: [{ username: "xQc" }],
+    };
+    const result = parse(config);
+
+    expect(result.streak_watch_streams).toBe(2);
+    expect(result.watch_streak_minutes).toBe(10);
+    expect(result.preferred_streamers).toEqual(["xqc", "summit1g"]);
+    expect(result.priority).toEqual(["PREFERRED", "DROPS", "ORDER"]);
+  });
+
+  it("strips empty preferred_streamers array (omitempty)", () => {
+    const config: AccountConfigForm = {
+      ...DEFAULT_CONFIG,
+      username: "guliveer_",
+      preferred_streamers: [],
+      streamers: [{ username: "xQc" }],
+    };
+    const result = parse(config);
+    expect(result.preferred_streamers).toBeUndefined();
+  });
 });
 
 // ─── accountConfigSchema ─────────────────────────────────────────────────────

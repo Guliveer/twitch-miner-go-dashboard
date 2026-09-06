@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { PriorityInput } from "../shared/PriorityInput";
+import { TagInput } from "../shared/TagInput";
 import { numRegister } from "../shared/form-helpers";
 
 export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
@@ -62,12 +63,50 @@ export function GeneralTab({ isAdmin }: { isAdmin: boolean }) {
         </div>
       </div>
 
+      <div className="grid gap-6 sm:grid-cols-2">
+        <div className="space-y-1.5">
+          <Label>Streak watch streams</Label>
+          <Input
+            type="number"
+            min={0}
+            {...register("streak_watch_streams", numRegister())}
+          />
+          <p className="text-xs text-muted-foreground">
+            Streams watched while a watch streak is pending. 0 disables the narrowing.
+          </p>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Watch streak minutes</Label>
+          <Input
+            type="number"
+            min={1}
+            step={1}
+            {...register("watch_streak_minutes", numRegister())}
+          />
+          <p className="text-xs text-muted-foreground">
+            How long a channel holds a streak slot before the next pending channel takes over. Default 10.
+          </p>
+        </div>
+      </div>
+
       <div className="space-y-1.5">
         <Label>Watch priority (ordered)</Label>
         <PriorityInput
           value={watch("priority")}
           onChange={(v) => setValue("priority", v as AccountConfigForm["priority"])}
         />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>Preferred streamers</Label>
+        <TagInput
+          value={watch("preferred_streamers") ?? []}
+          onChange={(v) => setValue("preferred_streamers", v)}
+          placeholder="Add channel…"
+        />
+        <p className="text-xs text-muted-foreground">
+          Channels picked first by the PREFERRED priority, in the order listed.
+        </p>
       </div>
 
       <div className="border border-border p-5 space-y-4">

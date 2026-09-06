@@ -221,7 +221,7 @@ The editor has five tabs that map directly to the bot's `AccountConfig` struct:
 
 | Tab | Fields |
 |---|---|
-| **General** | `enabled`, `max_watch_streams`, `priority`, `proxy`, `features`, `followers` |
+| **General** | `enabled`, `max_watch_streams`, `streak_watch_streams`, `watch_streak_minutes`, `preferred_streamers`, `priority`, `proxy`, `features`, `followers` |
 | **Streamers** | `streamer_defaults` (global), `streamers[]` with per-streamer overrides |
 | **Betting** | `streamer_defaults.make_predictions`, `streamer_defaults.bet` |
 | **Notifications** | `notifications.*` — Telegram, Discord, Webhook, Matrix, Pushover, Gotify *(admin only)* |

@@ -11,6 +11,7 @@ export const PRIORITIES = [
   "POINTS_DESCENDING",
   "ENDING_SOONEST",
   "LOW_AVAILABILITY_FIRST",
+  "PREFERRED",
 ] as const;
 export const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
 export const STRATEGIES = ["SMART", "HIGH_ODDS", "MOST_VOTED", "SMART_MONEY", "PERCENTAGE", "NUMBER_1", "NUMBER_2", "NUMBER_3", "NUMBER_4", "NUMBER_5", "NUMBER_6", "NUMBER_7", "NUMBER_8"] as const;
@@ -172,6 +173,9 @@ export const accountConfigSchema = z.object({
     enable_analytics: z.boolean(),
   }),
   max_watch_streams: z.number().int().min(0).optional(),
+  streak_watch_streams: z.number().int().min(0).optional(),
+  watch_streak_minutes: z.number().positive().optional(),
+  preferred_streamers: z.array(z.string()).catch([]),
   priority: z.array(z.enum(PRIORITIES)),
   proxy: z
     .string()
@@ -205,6 +209,9 @@ export const accountConfigSchema = z.object({
 export const generalTabSchema = accountConfigSchema.pick({
   enabled: true,
   max_watch_streams: true,
+  streak_watch_streams: true,
+  watch_streak_minutes: true,
+  preferred_streamers: true,
   priority: true,
   proxy: true,
   features: true,
@@ -241,6 +248,9 @@ export const DEFAULT_CONFIG: AccountConfigForm = {
   enabled: true,
   features: { claim_drops_startup: false, enable_analytics: true },
   max_watch_streams: 2,
+  streak_watch_streams: 2,
+  watch_streak_minutes: 10,
+  preferred_streamers: [],
   priority: ["STREAK", "DROPS", "ORDER"],
   proxy: "",
   category_watcher: { enabled: false, poll_interval: "2m0s", drops_only: false, categories: [] },
