@@ -5,15 +5,6 @@ export type ConfigWarning = {
   message: string;
 };
 
-const NOTIFICATION_PROVIDERS = [
-  "telegram",
-  "discord",
-  "webhook",
-  "matrix",
-  "pushover",
-  "gotify",
-] as const;
-
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -22,7 +13,10 @@ function capitalize(value: string): string {
  * Returns non-blocking warnings about a config that would make the bot
  * idle, ineffective, or contradictory. Used for the in-editor warning banner.
  */
-export function getConfigWarnings(config: AccountConfigForm): ConfigWarning[] {
+export function getConfigWarnings(
+  config: AccountConfigForm,
+  notificationProviders: string[],
+): ConfigWarning[] {
   const warnings: ConfigWarning[] = [];
 
   const hasStreamers = config.streamers.length > 0;
@@ -74,8 +68,11 @@ export function getConfigWarnings(config: AccountConfigForm): ConfigWarning[] {
     }
   }
 
-  for (const provider of NOTIFICATION_PROVIDERS) {
-    const settings = config.notifications?.[provider];
+  for (const provider of notificationProviders) {
+    const settings =
+      config.notifications?.[
+        provider as Exclude<keyof AccountConfigForm["notifications"], "batch">
+      ];
     if (settings?.enabled && (settings.events ?? []).length === 0) {
       warnings.push({
         id: `notification-no-events-${provider}`,
