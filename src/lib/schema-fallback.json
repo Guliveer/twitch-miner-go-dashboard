@@ -1,43 +1,67 @@
 {
-  "strategies": [
-    "MOST_VOTED",
-    "HIGH_ODDS",
-    "PERCENTAGE",
-    "SMART_MONEY",
-    "SMART",
-    "NUMBER_1",
-    "NUMBER_2",
-    "NUMBER_3",
-    "NUMBER_4",
-    "NUMBER_5",
-    "NUMBER_6",
-    "NUMBER_7",
-    "NUMBER_8"
+  "chat_modes": [
+    "ALWAYS",
+    "NEVER",
+    "ONLINE",
+    "OFFLINE"
   ],
-  "chat_modes": ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"],
-  "priorities": [
-    "STREAK",
-    "DROPS",
-    "ORDER",
-    "SUBSCRIBED",
-    "POINTS_ASCENDING",
-    "POINTS_DESCENDING"
+  "defaults": {
+    "badge_watcher_poll_interval": "5m",
+    "badge_watcher_streamer_limit": 1,
+    "bet": {
+      "delay": 6,
+      "delay_mode": "FROM_END",
+      "max_points": 50000,
+      "minimum_points": 0,
+      "percentage": 5,
+      "percentage_gap": 20,
+      "stealth_mode": false,
+      "strategy": "SMART"
+    },
+    "category_watcher_poll_interval": "120s",
+    "chat": "ONLINE",
+    "claim_drops": true,
+    "claim_moments": true,
+    "follow_raid": true,
+    "followers_order": "ASC",
+    "make_predictions": true,
+    "max_watch_streams": 2,
+    "poll_interval": "120s",
+    "priority": [
+      "STREAK",
+      "DROPS",
+      "ORDER"
+    ],
+    "streak_watch_streams": 2,
+    "team_watcher_poll_interval": "120s",
+    "watch_streak": true,
+    "watch_streak_minutes": 10
+  },
+  "delay_modes": [
+    "FROM_START",
+    "FROM_END",
+    "PERCENTAGE"
   ],
-  "followers_order": ["ASC", "DESC"],
-  "delay_modes": ["FROM_START", "FROM_END", "PERCENTAGE"],
-  "filter_where": ["GT", "LT", "GTE", "LTE"],
-  "filter_by": ["total_users", "total_points"],
-  "outcome_keys": [
+  "filter_by": [
+    "total_users",
+    "total_points",
     "percentage_users",
     "odds_percentage",
     "odds",
     "top_points",
-    "total_users",
-    "total_points",
     "decision_users",
     "decision_points"
   ],
-  "webhook_methods": ["GET", "POST"],
+  "filter_where": [
+    "GT",
+    "LT",
+    "GTE",
+    "LTE"
+  ],
+  "followers_order": [
+    "ASC",
+    "DESC"
+  ],
   "notification_events": [
     "STREAMER_ONLINE",
     "STREAMER_OFFLINE",
@@ -58,13 +82,13 @@
     "DROP_CLAIM",
     "DROP_CLAIM_AVAILABLE",
     "DROP_STATUS",
-    "DROP_MILESTONE",
     "CHAT_MENTION",
     "GIFTED_SUB",
     "MINER_STARTED",
     "MINER_STOPPED",
     "MINER_CRASHED",
     "ACCOUNT_CONFIG_RELOADED",
+    "DROP_MILESTONE",
     "TEST"
   ],
   "notification_providers": [
@@ -75,12 +99,87 @@
     "pushover",
     "gotify"
   ],
-  "defaults": {
-    "max_watch_streams": 2,
-    "priority": ["STREAK", "DROPS", "ORDER"],
-    "poll_interval": "120s",
-    "followers_order": "ASC",
-    "chat": "ONLINE"
-  },
-  "rules": []
+  "outcome_keys": [
+    "total_users",
+    "total_points",
+    "percentage_users",
+    "odds_percentage",
+    "odds",
+    "top_points",
+    "decision_users",
+    "decision_points"
+  ],
+  "priorities": [
+    "ORDER",
+    "STREAK",
+    "DROPS",
+    "SUBSCRIBED",
+    "POINTS_ASCENDING",
+    "POINTS_DESCENDING",
+    "ENDING_SOONEST",
+    "LOW_AVAILABILITY_FIRST",
+    "PREFERRED",
+    "BADGES"
+  ],
+  "rules": [
+    {
+      "condition": "requires",
+      "field": "streamer_defaults.make_predictions",
+      "message": "make_predictions requires bet config",
+      "target": "streamer_defaults.bet"
+    },
+    {
+      "condition": "requires_priority",
+      "field": "badge_watcher",
+      "message": "badge_watcher enabled requires BADGES in priority",
+      "value": "BADGES"
+    },
+    {
+      "condition": "range",
+      "field": "badge_watcher.streamer_limit",
+      "max": 2,
+      "message": "streamer_limit must be 1-2",
+      "min": 1
+    },
+    {
+      "condition": "min",
+      "field": "max_watch_streams",
+      "message": "must be non-negative",
+      "value": 0
+    },
+    {
+      "condition": "duration",
+      "field": "category_watcher.poll_interval",
+      "message": "must be a Go duration string"
+    },
+    {
+      "condition": "duration",
+      "field": "team_watcher.poll_interval",
+      "message": "must be a Go duration string"
+    },
+    {
+      "condition": "duration",
+      "field": "badge_watcher.poll_interval",
+      "message": "must be a Go duration string"
+    }
+  ],
+  "strategies": [
+    "MOST_VOTED",
+    "HIGH_ODDS",
+    "PERCENTAGE",
+    "SMART_MONEY",
+    "SMART",
+    "NUMBER_1",
+    "NUMBER_2",
+    "NUMBER_3",
+    "NUMBER_4",
+    "NUMBER_5",
+    "NUMBER_6",
+    "NUMBER_7",
+    "NUMBER_8"
+  ],
+  "webhook_methods": [
+    "GET",
+    "POST"
+  ]
 }
