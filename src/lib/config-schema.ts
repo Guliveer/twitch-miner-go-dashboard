@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Enum values mirror the bot's internal/model package. Keep in sync with
 // twitch-miner-go when the bot adds or renames values.
+/** @deprecated Use useBotSchema() */
 export const PRIORITIES = [
   "STREAK",
   "DROPS",
@@ -13,14 +14,22 @@ export const PRIORITIES = [
   "LOW_AVAILABILITY_FIRST",
   "PREFERRED",
 ] as const;
+/** @deprecated Use useBotSchema() */
 export const CHAT_MODES = ["ALWAYS", "NEVER", "ONLINE", "OFFLINE"] as const;
+/** @deprecated Use useBotSchema() */
 export const STRATEGIES = ["SMART", "HIGH_ODDS", "MOST_VOTED", "SMART_MONEY", "PERCENTAGE", "NUMBER_1", "NUMBER_2", "NUMBER_3", "NUMBER_4", "NUMBER_5", "NUMBER_6", "NUMBER_7", "NUMBER_8"] as const;
+/** @deprecated Use useBotSchema() */
 export const DELAY_MODES = ["FROM_START", "FROM_END", "PERCENTAGE"] as const;
+/** @deprecated Use useBotSchema() */
 export const OUTCOME_KEYS = ["percentage_users", "odds_percentage", "odds", "top_points", "total_users", "total_points", "decision_users", "decision_points"] as const;
+/** @deprecated Use useBotSchema() */
 export const CONDITIONS = ["GT", "LT", "GTE", "LTE"] as const;
+/** @deprecated Use useBotSchema() */
 export const FOLLOWERS_ORDERS = ["ASC", "DESC"] as const;
+/** @deprecated Use useBotSchema() */
 export const WEBHOOK_METHODS = ["GET", "POST"] as const;
 
+/** @deprecated Use useBotSchema() */
 export const ALL_EVENTS = [
   "STREAMER_ONLINE",
   "STREAMER_OFFLINE",
@@ -60,20 +69,20 @@ const durationString = z
   );
 
 const filterConditionSchema = z.object({
-  by: z.enum(OUTCOME_KEYS),
-  where: z.enum(CONDITIONS),
+  by: z.string(),
+  where: z.string(),
   value: z.number(),
 });
 
 export const betSettingsSchema = z.object({
-  strategy: z.enum(STRATEGIES).optional(),
+  strategy: z.string().optional(),
   percentage: z.number().int().optional(),
   percentage_gap: z.number().int().optional(),
   max_points: z.number().int().optional(),
   minimum_points: z.number().int().optional(),
   stealth_mode: z.boolean().optional(),
   delay: z.number().optional(),
-  delay_mode: z.enum(DELAY_MODES).optional(),
+  delay_mode: z.string().optional(),
   filter_condition: filterConditionSchema.optional(),
 });
 
@@ -85,7 +94,7 @@ const streamerSettingsSchema = z.object({
   watch_streak: z.boolean().optional(),
   community_goals: z.boolean().optional(),
   drops_only: z.boolean().optional(),
-  chat: z.enum(CHAT_MODES).optional(),
+  chat: z.string().optional(),
   bet: betSettingsSchema.optional(),
 });
 
@@ -103,14 +112,14 @@ const batchConfigSchema = z.object({
   enabled: z.boolean().optional(),
   interval: durationString.optional(),
   max_entries: z.number().int().optional(),
-  immediate_events: z.array(z.enum(ALL_EVENTS)).optional(),
+  immediate_events: z.array(z.string()).optional(),
 });
 
 const telegramSchema = z.object({
   enabled: z.boolean(),
   token: z.string().optional(),
   chat_id: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  events: z.array(z.string()).default([]),
   disable_notification: z.boolean(),
   batch: batchConfigSchema.optional(),
 });
@@ -118,15 +127,15 @@ const telegramSchema = z.object({
 const discordSchema = z.object({
   enabled: z.boolean(),
   webhook_url: z.string().url().optional().or(z.literal("")),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  events: z.array(z.string()).default([]),
   batch: batchConfigSchema.optional(),
 });
 
 const webhookSchema = z.object({
   enabled: z.boolean(),
   endpoint: z.string().url().optional().or(z.literal("")),
-  method: z.enum(WEBHOOK_METHODS),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  method: z.string(),
+  events: z.array(z.string()).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -135,7 +144,7 @@ const matrixSchema = z.object({
   homeserver: z.string().optional(),
   room_id: z.string().optional(),
   access_token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  events: z.array(z.string()).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -143,7 +152,7 @@ const pushoverSchema = z.object({
   enabled: z.boolean(),
   user_key: z.string().optional(),
   api_token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  events: z.array(z.string()).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -151,7 +160,7 @@ const gotifySchema = z.object({
   enabled: z.boolean(),
   url: z.string().url().optional().or(z.literal("")),
   token: z.string().optional(),
-  events: z.array(z.enum(ALL_EVENTS)).default([]),
+  events: z.array(z.string()).default([]),
   batch: batchConfigSchema.optional(),
 });
 
@@ -176,7 +185,7 @@ export const accountConfigSchema = z.object({
   streak_watch_streams: z.number().int().min(0).optional(),
   watch_streak_minutes: z.number().positive().optional(),
   preferred_streamers: z.array(z.string()).catch([]),
-  priority: z.array(z.enum(PRIORITIES)),
+  priority: z.array(z.string()),
   proxy: z
     .string()
     .refine(
@@ -201,7 +210,7 @@ export const accountConfigSchema = z.object({
   category_blacklist: z.array(z.string()).catch([]),
   followers: z.object({
     enabled: z.boolean(),
-    order: z.enum(FOLLOWERS_ORDERS),
+    order: z.string(),
   }),
   notifications: notificationsSchema,
 });
