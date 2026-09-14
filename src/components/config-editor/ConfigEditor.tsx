@@ -44,6 +44,8 @@ import { BettingTab } from "./tabs/BettingTab";
 import { NotificationsTab } from "./tabs/NotificationsTab";
 import { WatchersTab } from "./tabs/WatchersTab";
 import { ConfigWarningsBanner } from "./shared/ConfigWarningsBanner";
+import { SchemaProvider } from "@/lib/schema-context";
+import type { BotConfigSchema } from "@/lib/schema-types";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { exportConfigAsYaml } from "@/lib/export-yaml";
@@ -55,9 +57,10 @@ type Props = {
   isAdmin: boolean;
   allAccounts: string[];
   ownerDisplayName?: string;
+  schema: BotConfigSchema;
 };
 
-export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplayName }: Props) {
+export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplayName, schema }: Props) {
   const router = useRouter();
   const methods = useForm<AccountConfigForm>({
     defaultValues: initialConfig,
@@ -160,13 +163,14 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
   };
 
   return (
-    <FormProvider {...methods}>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          setSaveDialogOpen(true);
-        }}
-      >
+    <SchemaProvider value={schema}>
+      <FormProvider {...methods}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setSaveDialogOpen(true);
+          }}
+        >
         {/* Header */}
         <div className="flex items-center justify-between gap-4 mb-6">
           <div className="flex items-center gap-3 min-w-0">
@@ -324,6 +328,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
           onOpenChange={setAuthModalOpen}
         />
       )}
-    </FormProvider>
+      </FormProvider>
+    </SchemaProvider>
   );
 }
