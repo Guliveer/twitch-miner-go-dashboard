@@ -1,4 +1,5 @@
 import { accountConfigSchema } from "../config-schema";
+import schemaFallback from "../schema-fallback.json";
 
 test("parses minimal config", () => {
   const result = accountConfigSchema.safeParse({
@@ -71,4 +72,8 @@ test("rejects negative streak_watch_streams", () => {
     notifications: {},
   });
   expect(result.success).toBe(false);
+});
+
+test("fallback snapshot contains all known events", () => {
+  expect(schemaFallback.notification_events).toContain("STREAMER_ONLINE");
 });
