@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PRIORITIES } from "@/lib/config-schema";
+import { useBotSchema } from "@/lib/schema-context";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -19,7 +19,8 @@ type Props = {
 
 export function PriorityInput({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
-  const available = PRIORITIES.filter((p) => !value.includes(p));
+  const schema = useBotSchema();
+  const available = schema.priorities.filter((p) => !value.includes(p));
 
   const add = (p: string) => {
     onChange([...value, p]);

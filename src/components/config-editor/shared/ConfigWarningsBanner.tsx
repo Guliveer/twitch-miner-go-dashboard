@@ -3,11 +3,13 @@
 import { useFormContext } from "react-hook-form";
 import type { AccountConfigForm } from "@/lib/config-schema";
 import { getConfigWarnings } from "@/lib/config-warnings";
+import { useBotSchema } from "@/lib/schema-context";
 import { AlertTriangle } from "lucide-react";
 
 export function ConfigWarningsBanner() {
   const { watch } = useFormContext<AccountConfigForm>();
-  const warnings = getConfigWarnings(watch());
+  const schema = useBotSchema();
+  const warnings = getConfigWarnings(watch(), schema.notification_providers);
 
   if (warnings.length === 0) return null;
 

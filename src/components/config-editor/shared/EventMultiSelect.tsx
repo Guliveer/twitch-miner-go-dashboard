@@ -1,6 +1,6 @@
 "use client";
 
-import { ALL_EVENTS } from "@/lib/config-schema";
+import { useBotSchema } from "@/lib/schema-context";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -15,6 +15,9 @@ type Props = {
 };
 
 export function EventMultiSelect({ value, onChange }: Props) {
+  const schema = useBotSchema();
+  const events = schema.notification_events;
+
   const toggle = (event: string) => {
     if (value.includes(event)) onChange(value.filter((e) => e !== event));
     else onChange([...value, event]);
@@ -36,7 +39,7 @@ export function EventMultiSelect({ value, onChange }: Props) {
         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </PopoverTrigger>
       <PopoverContent className="w-80 p-2 max-h-72 overflow-y-auto" role="listbox" aria-label="Events">
-        {ALL_EVENTS.map((event) => (
+        {events.map((event) => (
           <button
             key={event}
             type="button"

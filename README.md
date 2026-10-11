@@ -51,6 +51,8 @@ Browser → Dashboard (Next.js) → Supabase PostgreSQL
 
 Changes saved in the dashboard take effect the next time the bot restarts or reloads its config (via PostgreSQL LISTEN/NOTIFY if the bot is configured for it).
 
+The config editor fetches the config schema (enum values and defaults) from the bot at runtime via `GET /api/config/schema`, so dropdowns always reflect exactly what the bot accepts. This requires `BOT_URL` and `BOT_API_KEY` to be set (previously they were only needed for YAML generation). If `BOT_URL` is unset or the bot is unreachable, the editor falls back to a committed snapshot of the schema (`src/lib/schema-fallback.json`) and remains fully functional.
+
 ---
 
 ## Features

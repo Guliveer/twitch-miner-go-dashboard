@@ -447,7 +447,7 @@ describe("accountConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects invalid priority value", () => {
+  it("accepts any priority value (enums are runtime-driven)", () => {
     const result = accountConfigSchema.safeParse({
       username: "x",
       features: { claim_drops_startup: false, enable_analytics: false },
@@ -461,10 +461,10 @@ describe("accountConfigSchema", () => {
       followers: { enabled: false, order: "ASC" },
       notifications: {},
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
-  it("rejects invalid chat mode in streamer_defaults", () => {
+  it("accepts any chat mode (enums are runtime-driven)", () => {
     const result = accountConfigSchema.safeParse({
       username: "x",
       features: { claim_drops_startup: false, enable_analytics: false },
@@ -478,7 +478,7 @@ describe("accountConfigSchema", () => {
       followers: { enabled: false, order: "ASC" },
       notifications: {},
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("coerces null arrays to empty via .catch([])", () => {
@@ -520,7 +520,7 @@ describe("accountConfigSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("rejects invalid bet strategy", () => {
+  it("accepts any bet strategy (enums are runtime-driven)", () => {
     const result = accountConfigSchema.safeParse({
       username: "x",
       features: { claim_drops_startup: false, enable_analytics: false },
@@ -534,7 +534,7 @@ describe("accountConfigSchema", () => {
       followers: { enabled: false, order: "ASC" },
       notifications: {},
     });
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(true);
   });
 
   it("accepts valid duration string for poll_interval", () => {

@@ -9,6 +9,7 @@ import {
   enforceNonAdminConfig,
   prepareConfigJson,
 } from "@/lib/config-transform";
+import { getConfigSchema } from "@/actions/get-config-schema";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -147,7 +148,19 @@ export async function getBotAccount(username: string): Promise<{ config: Account
 
   let raw: Record<string, unknown> = {};
   try { raw = coerceNullToUndefined(JSON.parse(account.config_json)) as Record<string, unknown>; } catch { /* ignore */ }
-  const config = deepMergeDefaults(DEFAULT_CONFIG, { ...raw, username });
+  const schema = await getConfigSchema();
+  // The bot's defaults map uses flat keys (e.g. "chat", "make_predictions")
+  // that do not match the nested AccountConfigForm shape. Only keys that map
+  // to top-level form fields are applied; DEFAULT_CONFIG keeps the structure.
+  const knownKeys = new Set(Object.keys(DEFAULT_CONFIG));
+  const schemaDefaults = Object.fromEntries(
+    Object.entries(schema.defaults).filter(([k]) => knownKeys.has(k)),
+  );
+  const config = deepMergeDefaults(DEFAULT_CONFIG, {
+    ...schemaDefaults,
+    ...raw,
+    username,
+  });
   return { config, isAdmin: admin, ownerDisplayName };
 }
 
