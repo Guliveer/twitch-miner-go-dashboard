@@ -229,7 +229,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
               <Save className="h-4 w-4" />
               {isPending ? "Saving…" : "Save changes"}
               {isDirty && !isPending && (
-                <span className="ml-1 h-1.5 w-1.5 bg-accent" />
+                <span className="ml-1 h-1.5 w-1.5 bg-success" />
               )}
             </Button>
           </div>

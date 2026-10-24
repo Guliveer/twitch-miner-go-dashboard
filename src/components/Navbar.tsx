@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTransition } from "react";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Tv2, LayoutDashboard, Users, Bot, Settings, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -32,7 +31,7 @@ export function Navbar({ isAdmin }: Props) {
         className={cn(
           "relative text-xs font-semibold uppercase tracking-wider transition-colors pb-1 inline-flex items-center gap-1.5",
           active
-            ? "text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-accent"
+            ? "text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-success"
             : "text-muted-foreground hover:text-foreground",
         )}
       >
@@ -44,14 +43,14 @@ export function Navbar({ isAdmin }: Props) {
   };
 
   return (
-    <header className="border-b border-border sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="border-b border-border sticky top-0 z-50 bg-background">
       <div className="mx-auto max-w-5xl px-6 py-4 flex items-center gap-8">
         <Link
           href="/dashboard"
           className="flex items-center gap-2 font-semibold tracking-tight hover:opacity-80 transition-opacity"
         >
           <Tv2 className="h-4 w-4" />
-          <span className="text-sm">Twitch Miner</span>
+          <span className="text-sm">Twitch Miner Go</span>
         </Link>
 
         <nav className="flex items-center gap-6">
@@ -66,7 +65,6 @@ export function Navbar({ isAdmin }: Props) {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger
               render={<Button variant="ghost" size="icon" aria-label="User menu" />}

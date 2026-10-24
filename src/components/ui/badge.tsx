@@ -9,12 +9,12 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-accent text-accent bg-accent/10",
+        default: "border-border text-muted-foreground bg-muted",
         secondary: "border-border text-muted-foreground bg-muted",
         destructive: "border-destructive text-destructive bg-destructive/10",
         outline: "border-foreground text-foreground",
         ghost: "text-muted-foreground",
-        link: "text-foreground underline underline-offset-4 hover:text-accent",
+        link: "text-foreground underline underline-offset-4 hover:text-foreground/85",
       },
     },
     defaultVariants: {

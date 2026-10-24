@@ -38,9 +38,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background">
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center gap-3 mb-10">
-          <Tv2 className="h-6 w-6 text-accent" />
+          <Tv2 className="h-6 w-6 text-foreground" />
           <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            Twitch Miner
+            Twitch Miner Go
           </h1>
           <p className="text-sm text-muted-foreground">
             Sign in to manage your bot accounts
