@@ -22,7 +22,7 @@ export default async function AdminAccountsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight">Bot accounts</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Bot accounts</h1>
         <p className="text-sm text-muted-foreground mt-1">Assign bot accounts to users</p>
       </div>
       <ClaimAccountForm unclaimedAccounts={unclaimed} users={users} />

@@ -46,8 +46,8 @@ export default function ChangePasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center gap-3 mb-10">
-          <KeyRound className="h-6 w-6 text-accent" />
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <KeyRound className="h-6 w-6 text-foreground" />
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Set your password
           </h1>
           <p className="text-sm text-muted-foreground text-center">

@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
-import { Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import { Analytics } from "@vercel/analytics/next";
 
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
+const geist = Geist({
+  variable: "--font-geist",
   subsets: ["latin"],
 });
 
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Twitch Miner Dashboard",
+  title: {
+    default: "Dashboard — Twitch Miner Go",
+    template: "%s — Twitch Miner Go",
+  },
   description: "Manage twitch-miner-go bot configurations",
   icons: {
     icon: "/favicon.svg",
@@ -30,11 +32,11 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${interTight.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${geist.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        {children}
         <Analytics />
       </body>
     </html>
