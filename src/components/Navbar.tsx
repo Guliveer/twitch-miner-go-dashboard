@@ -29,7 +29,7 @@ export function Navbar({ isAdmin }: Props) {
       <Link
         href={href}
         className={cn(
-          "relative text-xs font-semibold uppercase tracking-wider transition-colors pb-1 inline-flex items-center gap-1.5",
+          "relative text-sm font-medium tracking-tight transition-colors pb-1 inline-flex items-center gap-1.5",
           active
             ? "text-foreground after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:bg-success"
             : "text-muted-foreground hover:text-foreground",

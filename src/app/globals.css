@@ -4,9 +4,77 @@
 
 @custom-variant dark (&:is(.dark *));
 
+:root,
+.dark {
+  color-scheme: dark;
+
+  /* Modern Dark — authoritative tokens (DESIGN.md) */
+  --dp-color-ground: #050505;
+  --dp-color-panel: #0e0e0e;
+  --dp-color-raised: #161616;
+  --dp-color-hairline: #222222;
+  --dp-color-hairline-2: #303030;
+  --dp-color-bright: #f2f2f2;
+  --dp-color-bright-hover: #dcdcdc;
+  --dp-color-read: #a6a9ad;
+  --dp-color-meta: #8a8d91;
+  --dp-color-live: #3fd6c6;
+  --dp-color-danger: #f87171;
+  --dp-color-inverse-ink: #0a0a0a;
+
+  --dp-spacing-gutter: 48px;
+  --dp-spacing-gutter-narrow: 20px;
+  --dp-spacing-gap: 24px;
+  --dp-spacing-max: 1360px;
+  --dp-radius-panel: 6px;
+  --dp-radius-pill: 999px;
+  --dp-border-hairline: 1px;
+
+  --dp-motion-duration: 120ms;
+  --dp-motion-ease: ease-out;
+
+  /* Interface roles */
+  --background: var(--dp-color-ground);
+  --foreground: var(--dp-color-bright);
+  --card: var(--dp-color-panel);
+  --card-foreground: var(--dp-color-bright);
+  --popover: var(--dp-color-panel);
+  --popover-foreground: var(--dp-color-bright);
+  --primary: var(--dp-color-bright);
+  --primary-foreground: var(--dp-color-inverse-ink);
+  --secondary: var(--dp-color-panel);
+  --secondary-foreground: var(--dp-color-bright);
+  --muted: var(--dp-color-panel);
+  --muted-foreground: var(--dp-color-read);
+  --accent: var(--dp-color-panel);
+  --accent-foreground: var(--dp-color-bright);
+  --destructive: var(--dp-color-danger);
+  --success: var(--dp-color-live);
+  --border: var(--dp-color-hairline);
+  --input: var(--dp-color-panel);
+  --ring: var(--dp-color-bright);
+
+  /* Monochrome chart scale with a single mint lead */
+  --chart-1: var(--dp-color-live);
+  --chart-2: var(--dp-color-bright);
+  --chart-3: var(--dp-color-meta);
+  --chart-4: #5f6265;
+  --chart-5: #c6c8ca;
+
+  --sidebar: var(--dp-color-panel);
+  --sidebar-foreground: var(--dp-color-bright);
+  --sidebar-primary: var(--dp-color-bright);
+  --sidebar-primary-foreground: var(--dp-color-inverse-ink);
+  --sidebar-accent: var(--dp-color-panel);
+  --sidebar-accent-foreground: var(--dp-color-bright);
+  --sidebar-border: var(--dp-color-hairline);
+  --sidebar-ring: var(--dp-color-bright);
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-raised: var(--dp-color-raised);
   --font-sans: var(--font-geist);
   --font-mono: var(--font-geist-mono);
 
@@ -42,91 +110,68 @@
   --color-card: var(--card);
 
   /* 6px panel radius — pill (999px) is applied to buttons directly (DESIGN.md) */
-  --radius: 6px;
-  --radius-sm: 6px;
-  --radius-md: 6px;
-  --radius-lg: 6px;
-  --radius-xl: 6px;
-  --radius-2xl: 6px;
-  --radius-3xl: 6px;
-  --radius-4xl: 6px;
-}
-
-:root,
-.dark {
-  /* Modern Dark — single theme; ground, panel, hairlines (DESIGN.md) */
-  --background: #050505;
-  --foreground: #F2F2F2;
-  --card: #0E0E0E;
-  --card-foreground: #F2F2F2;
-  --popover: #0E0E0E;
-  --popover-foreground: #F2F2F2;
-  --primary: #F2F2F2;
-  --primary-foreground: #0A0A0A;
-  --secondary: #0E0E0E;
-  --secondary-foreground: #F2F2F2;
-  --muted: #0E0E0E;
-  --muted-foreground: #A6A9AD;
-  --accent: #0E0E0E;
-  --accent-foreground: #F2F2F2;
-  --destructive: #EF4444;
-  --success: #3FD6C6;
-  --border: #222222;
-  --input: #0A0A0A;
-  --ring: #F2F2F2;
-  /* Monochrome chart scale with a single mint lead */
-  --chart-1: #3FD6C6;
-  --chart-2: #F2F2F2;
-  --chart-3: #8A8D91;
-  --chart-4: #5F6265;
-  --chart-5: #C6C8CA;
-  --sidebar: #0E0E0E;
-  --sidebar-foreground: #F2F2F2;
-  --sidebar-primary: #F2F2F2;
-  --sidebar-primary-foreground: #0A0A0A;
-  --sidebar-accent: #0E0E0E;
-  --sidebar-accent-foreground: #F2F2F2;
-  --sidebar-border: #222222;
-  --sidebar-ring: #F2F2F2;
+  --radius: var(--dp-radius-panel);
+  --radius-sm: var(--dp-radius-panel);
+  --radius-md: var(--dp-radius-panel);
+  --radius-lg: var(--dp-radius-panel);
+  --radius-xl: var(--dp-radius-panel);
+  --radius-2xl: var(--dp-radius-panel);
+  --radius-3xl: var(--dp-radius-panel);
+  --radius-4xl: var(--dp-radius-panel);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
-  }
-
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: var(--border);
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: var(--muted-foreground);
+    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground;
   }
 
+  *:focus-visible {
+    outline: 2px solid var(--dp-color-bright);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--dp-color-bright);
+    color: var(--dp-color-ground);
+  }
+
   html {
     scrollbar-gutter: stable;
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--dp-color-hairline-2) transparent;
   }
 
-  /* Selection color */
-  ::selection {
-    background: color-mix(in srgb, var(--foreground) 18%, transparent);
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
   }
 
-  /* Focus-visible global */
-  *:focus-visible {
-    outline: 2px solid var(--ring);
-    outline-offset: 2px;
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: var(--dp-color-hairline-2);
+    border: 3px solid var(--dp-color-ground);
+    border-radius: var(--dp-radius-pill);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: var(--dp-color-meta);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

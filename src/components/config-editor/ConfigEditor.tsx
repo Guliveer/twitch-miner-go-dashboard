@@ -187,7 +187,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
                 value={initialConfig.username}
                 onValueChange={handleAccountChange}
               >
-                <SelectTrigger className="w-auto border-none bg-transparent shadow-none px-0 text-2xl font-bold tracking-tight h-auto focus:border-none">
+                <SelectTrigger className="w-auto border-none bg-transparent shadow-none px-0 text-2xl font-semibold tracking-tight h-auto focus:border-none">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent align="start">
@@ -197,7 +197,7 @@ export function ConfigEditor({ initialConfig, isAdmin, allAccounts, ownerDisplay
                 </SelectContent>
               </Select>
             ) : (
-              <h1 className="text-2xl font-bold tracking-tight truncate">{initialConfig.username}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight truncate">{initialConfig.username}</h1>
             )}
             {ownerDisplayName && (
               <span className="text-xs text-muted-foreground">

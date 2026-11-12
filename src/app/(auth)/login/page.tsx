@@ -39,7 +39,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm px-6">
         <div className="flex flex-col items-center gap-3 mb-10">
           <Tv2 className="h-6 w-6 text-foreground" />
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Twitch Miner Go
           </h1>
           <p className="text-sm text-muted-foreground">

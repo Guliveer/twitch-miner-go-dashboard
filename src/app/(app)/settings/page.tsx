@@ -46,7 +46,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="max-w-lg space-y-8">
-      <h1 className="text-2xl font-bold">Settings</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
       <SettingsForm
         name={user?.user_metadata?.display_name ?? ""}
         email={user?.email ?? ""}
