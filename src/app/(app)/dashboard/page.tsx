@@ -18,7 +18,7 @@ export default async function DashboardPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">
             Bot accounts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
       </div>
 
       {accounts.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 py-20 text-center border border-dashed border-border">
+        <div className="flex flex-col items-center gap-4 rounded-lg border border-border bg-card py-20 text-center">
           <Bot className="h-10 w-10 text-muted-foreground/40" />
           <div className="space-y-1">
             <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">No bot accounts yet</p>
@@ -45,7 +45,7 @@ export default async function DashboardPage() {
         <div className="space-y-4">
           <AccountsGrid accounts={accounts} compact />
           {atLimit && (
-            <div className="border border-dashed border-border p-4 flex items-start gap-3 text-sm text-muted-foreground">
+            <div className="flex items-start gap-3 rounded-lg border border-border bg-card p-4 text-sm text-muted-foreground">
               <ExternalLink className="h-4 w-4 mt-0.5 shrink-0" />
               <p>
                 You&apos;ve reached the 1-account limit for shared users.{" "}

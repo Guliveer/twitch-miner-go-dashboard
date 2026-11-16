@@ -55,7 +55,7 @@ export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
 
         <div className="space-y-4">
           <div className="flex items-center gap-2 border border-border bg-muted p-3">
-            <code className="flex-1 text-center text-lg font-bold tracking-widest text-accent">
+            <code className="flex-1 text-center text-lg font-bold tracking-widest text-foreground">
               {code.userCode}
             </code>
             <Button
@@ -67,7 +67,7 @@ export function DeviceCodeModal({ username, code, open, onOpenChange }: Props) {
               aria-label="Copy authorization code"
             >
               {copied ? (
-                <Check className="h-4 w-4 text-accent" />
+                <Check className="h-4 w-4 text-success" />
               ) : (
                 <Copy className="h-4 w-4" />
               )}
